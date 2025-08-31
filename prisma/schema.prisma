@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  events Event[]
+  
+  @@map("users")
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  date        DateTime
+  time        String?
+  location    String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Foreign Keys
+  userId     String
+  templateId String
+  
+  // Relations
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template Template   @relation(fields: [templateId], references: [id])
+  invites  Invite[]
+  
+  // Indexes
+  @@index([userId])
+  @@index([date])
+  @@map("events")
+}
+
+model Invite {
+  id         String    @id @default(uuid())
+  guestName  String
+  email      String
+  qrCode     String    @unique
+  message    String?
+  sentAt     DateTime?
+  viewedAt   DateTime?
+  rsvpAt     DateTime?
+  rsvpStatus String?   // 'pending' | 'accepted' | 'declined'
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  // Foreign Keys
+  eventId String
+  
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  // Indexes
+  @@index([eventId])
+  @@index([email])
+  @@map("invites")
+}
+
+model Template {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  thumbnail   String?
+  isPremium   Boolean  @default(false)
+  styleConfig Json     // Stores colors, fonts, layout configuration
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  events Event[]
+  
+  @@map("templates")
+}
+
+model RSVP {
+  id        String   @id @default(uuid())
+  inviteId  String   @unique
+  response  String   // 'accepted' | 'declined'
+  message   String?
+  dietaryReq String?
+  plusOne   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("rsvps")
+}
