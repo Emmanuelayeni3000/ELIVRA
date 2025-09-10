@@ -1,0 +1,418 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Event Reminder - Don't Miss Out!</title>
+  <style type="text/css">
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #F5F0E6 0%, #FFFFFF 100%);
+      color: #1D3557;
+      line-height: 1.6;
+    }
+    
+    table {
+      border-spacing: 0;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    
+    table td {
+      border-collapse: collapse;
+    }
+    
+    img {
+      -ms-interpolation-mode: bicubic;
+    }
+    
+    .ExternalClass {
+      width: 100%;
+    }
+    
+    .ExternalClass,
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td,
+    .ExternalClass div {
+      line-height: 100%;
+    }
+    
+    .ReadMsgBody {
+      width: 100%;
+      background-color: #ffffff;
+    }
+    
+    a[x-apple-data-detectors] {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+    
+    .link-color {
+      color: #C9A368;
+    }
+    
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(29, 53, 87, 0.08);
+      overflow: hidden;
+    }
+    
+    .reminder-border {
+      height: 4px;
+      background: linear-gradient(90deg, #F59E0B 0%, #F97316 50%, #F59E0B 100%);
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #F59E0B 0%, #F97316 50%, #F59E0B 100%);
+      color: white;
+      padding: 50px 40px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .reminder-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0 0 15px 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      letter-spacing: -0.5px;
+    }
+    
+    .reminder-subtitle {
+      font-size: 18px;
+      font-weight: 300;
+      opacity: 0.95;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+    
+    .content {
+      padding: 50px 40px;
+    }
+    
+    .urgency-card {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FEF08A 100%);
+      padding: 30px;
+      border-radius: 16px;
+      margin: 35px 0;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      text-align: center;
+      position: relative;
+    }
+    
+    .urgency-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #F59E0B, #F97316, #F59E0B);
+    }
+    
+    .urgency-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    
+    .urgency-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: #92400E;
+      margin: 0 0 10px 0;
+    }
+    
+    .urgency-subtitle {
+      font-size: 14px;
+      color: #A16207;
+      margin: 0;
+    }
+    
+    .countdown {
+      background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+      padding: 25px;
+      border-radius: 16px;
+      margin: 35px 0;
+      text-align: center;
+      border: 1px solid rgba(59, 130, 246, 0.1);
+    }
+    
+    .countdown-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: #1E40AF;
+      margin: 0;
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .countdown-label {
+      font-size: 16px;
+      color: #1E3A8A;
+      margin: 5px 0 0 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .event-details {
+      background: linear-gradient(135deg, #F5F0E6 0%, #FAF5F0 100%);
+      padding: 35px;
+      border-radius: 16px;
+      margin: 35px 0;
+      border: 1px solid rgba(201, 163, 104, 0.1);
+      position: relative;
+    }
+    
+    .event-details::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #C9A368, #D4B377, #C9A368);
+    }
+    
+    .event-title {
+      font-family: 'Playfair Display', serif;
+      color: #1D3557;
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 25px 0;
+      text-align: center;
+      letter-spacing: -0.3px;
+    }
+    
+    .detail-item {
+      margin: 18px 0;
+      display: table;
+      width: 100%;
+      font-size: 16px;
+      color: #1D3557;
+    }
+    
+    .detail-icon {
+      display: table-cell;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #C9A368, #D4B377);
+      border-radius: 12px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(201, 163, 104, 0.2);
+    }
+    
+    .detail-text {
+      display: table-cell;
+      padding-left: 20px;
+      vertical-align: middle;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    
+    .cta-section {
+      text-align: center;
+      margin: 40px 0;
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      padding: 30px;
+      border-radius: 16px;
+      border: 2px solid #F59E0B;
+    }
+    
+    .cta-text {
+      font-size: 18px;
+      margin-bottom: 25px;
+      color: #92400E;
+      font-weight: 600;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+      color: white !important;
+      padding: 20px 45px;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+      text-transform: uppercase;
+    }
+    
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #F59E0B, transparent);
+      margin: 40px 0;
+    }
+    
+    .reminder-message {
+      text-align: center;
+      font-size: 16px;
+      color: #1D3557;
+      margin: 35px 0;
+      line-height: 1.7;
+    }
+    
+    .signature {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1D3557;
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .footer {
+      background: linear-gradient(135deg, #F5F0E6 0%, #E8DDD4 100%);
+      padding: 30px 40px;
+      text-align: center;
+      border-top: 1px solid rgba(201, 163, 104, 0.1);
+    }
+    
+    .footer-content {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .wedvite-branding {
+      margin-top: 15px;
+      font-weight: 600;
+      color: #C9A368;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Mobile Responsive */
+    @media only screen and (max-width: 600px) {
+      .container {
+        border-radius: 12px;
+        margin: 10px;
+      }
+      .header {
+        padding: 35px 25px;
+      }
+      .reminder-title {
+        font-size: 32px;
+      }
+      .content {
+        padding: 35px 25px;
+      }
+      .event-details, .urgency-card, .countdown, .cta-section {
+        padding: 25px 20px;
+      }
+      .footer {
+        padding: 25px 20px;
+      }
+      .cta-button {
+        padding: 15px 35px;
+        font-size: 16px;
+      }
+      .detail-icon {
+        width: 40px;
+        height: 40px;
+      }
+      .countdown-number {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 5px;
+      background-color: #C9A368; /* gold-foil */
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    @media screen and (max-width: 600px) {
+      .full-width-image img {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .block-wrapper {
+        display: block !important;
+        width: 100% !important;
+      }
+      .padding-reset {
+        padding: 0 !important;
+      }
+      .mobile-padding {
+        padding: 20px !important;
+      }
+      .mobile-center {
+        text-align: center !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F5F0E6;">
+  <center style="width: 100%; background-color: #F5F0E6;">
+    <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
+      A friendly reminder about your upcoming event!
+    </div>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%; max-width:600px; background-color:#ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+      <!-- Header -->
+      <tr>
+        <td style="padding: 20px 30px; text-align: center; background-color: #1D3557;">
+          <img src="[BASE_URL]/images/wedvite-logo.png" alt="WedVite Logo" width="150" style="display: block; border: 0;" />
+        </td>
+      </tr>
+
+      <!-- Content -->
+      <tr>
+        <td style="padding: 40px 30px; background-color: #ffffff;">
+          <h1 style="font-family: Arial, sans-serif; font-size: 24px; color: #1D3557; margin: 0 0 20px 0; text-align: center;">Event Reminder!</h1>
+          <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #444444; margin: 0 0 20px 0;">
+            Dear [Guest Name],
+          </p>
+          <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #444444; margin: 0 0 20px 0;">
+            Just a friendly reminder about your upcoming event:
+          </p>
+          <h2 style="font-family: Arial, sans-serif; font-size: 20px; color: #C9A368; margin: 0 0 10px 0; text-align: center;">[Event Title]</h2>
+          <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #444444; margin: 0 0 10px 0; text-align: center;">
+            <strong>Date:</strong> [Event Date]
+          </p>
+          <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #444444; margin: 0 0 20px 0; text-align: center;">
+            <strong>Location:</strong> [Event Location]
+          </p>
+          <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 20px; color: #444444; margin: 0;">
+            We look forward to seeing you there!
+          </p>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="padding: 20px 30px; text-align: center; font-size: 12px; color: #ffffff; background-color: #1D3557;">
+          <p>&copy; 2025 WedVite. All rights reserved.</p>
+          <p style="margin-top: 10px;">
+            <a href="#" style="color: #C9A368; text-decoration: none;">Unsubscribe</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </center>
+</body>
+</html>

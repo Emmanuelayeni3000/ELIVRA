@@ -1,22 +1,16 @@
-import QRCode from 'qrcode'
+import { toDataURL } from 'qrcode'; // Import toDataURL from 'qrcode' library
 
-export const generateQRCode = async (data: string): Promise<string> => {
-  try {
-    const qrCodeDataUrl = await QRCode.toDataURL(data, {
-      errorCorrectionLevel: 'M',
-      type: 'image/png',
-      margin: 1,
-      width: 200
-    })
-    
-    return qrCodeDataUrl
-  } catch (error) {
-    console.error('QR Code generation error:', error)
-    throw new Error('Failed to generate QR code')
-  }
-}
+export const generateQRCodeDataURL = (text: string, size: number = 128): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    toDataURL(text, { width: size, errorCorrectionLevel: 'H' }, (err, url) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(url);
+      }
+    });
+  });
+};
 
-export const generateInviteQRCode = async (inviteId: string): Promise<string> => {
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${inviteId}`
-  return generateQRCode(inviteUrl)
-}
+// Alias for backward compatibility
+export const generateQRCode = generateQRCodeDataURL;

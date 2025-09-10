@@ -13,6 +13,7 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  password  String
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,6 +42,7 @@ model Event {
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   template Template   @relation(fields: [templateId], references: [id])
   invites  Invite[]
+  reminders Reminder[]
   
   // Indexes
   @@index([userId])
@@ -51,13 +53,16 @@ model Event {
 model Invite {
   id         String    @id @default(uuid())
   guestName  String
-  email      String
+  email      String?
+  phone      String?
   qrCode     String    @unique
   message    String?
   sentAt     DateTime?
   viewedAt   DateTime?
   rsvpAt     DateTime?
   rsvpStatus String?   // 'pending' | 'accepted' | 'declined'
+  guestCount Int? // Added guestCount field
+  dietaryRequirements String? // Added dietaryRequirements field
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   
@@ -66,6 +71,7 @@ model Invite {
   
   // Relations
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reminders Reminder[]
   
   // Indexes
   @@index([eventId])
@@ -101,4 +107,22 @@ model RSVP {
   updatedAt DateTime @updatedAt
   
   @@map("rsvps")
+}
+
+model Reminder {
+  id        String   @id @default(uuid())
+  inviteId  String   // Changed from guestId to inviteId
+  eventId   String
+  type      String   // 'general', 'rsvp', 'deadline', 'final'
+  message   String
+  sentAt    DateTime @default(now())
+  status    String   @default("sent") // 'sent', 'failed', 'delivered'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  invite    Invite   @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@map("reminders")
 }

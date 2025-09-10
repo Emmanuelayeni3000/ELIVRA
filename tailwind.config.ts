@@ -12,8 +12,10 @@ const config: Config = {
       colors: {
         // WedVite Brand Colors
         'pearl-beige': '#F5F0E6',
+        'pure-white': '#FFFFFF',
         'royal-navy': '#1D3557',
         'gold-foil': '#C9A368',
+        'gold-sand': '#D4B377',
         'slate-gray': '#444444',
         'champagne': '#F7E7CE',
         'blush': '#F5D5D0',

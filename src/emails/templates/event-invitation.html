@@ -1,0 +1,411 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>You're Invited to an Event!</title>
+  <style type="text/css">
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #F5F0E6 0%, #FFFFFF 100%);
+      color: #1D3557;
+      line-height: 1.6;
+    }
+    
+    table {
+      border-spacing: 0;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    
+    table td {
+      border-collapse: collapse;
+    }
+    
+    img {
+      -ms-interpolation-mode: bicubic;
+    }
+    
+    .ExternalClass {
+      width: 100%;
+    }
+    
+    .ExternalClass,
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td,
+    .ExternalClass div {
+      line-height: 100%;
+    }
+    
+    .ReadMsgBody {
+      width: 100%;
+      background-color: #ffffff;
+    }
+    
+    a[x-apple-data-detectors] {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+    
+    .link-color {
+      color: #C9A368;
+    }
+    
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(29, 53, 87, 0.08);
+      overflow: hidden;
+    }
+    
+    .decorative-border {
+      height: 4px;
+      background: linear-gradient(90deg, #C9A368 0%, #D4B377 50%, #C9A368 100%);
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1D3557 0%, #2A4A6B 50%, #1D3557 100%);
+      color: white;
+      padding: 50px 40px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .invitation-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0 0 15px 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      letter-spacing: -0.5px;
+    }
+    
+    .invitation-subtitle {
+      font-size: 18px;
+      font-weight: 300;
+      opacity: 0.95;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+    
+    .content {
+      padding: 50px 40px;
+    }
+    
+    .greeting {
+      font-size: 18px;
+      margin-bottom: 25px;
+      color: #1D3557;
+    }
+    
+    .guest-name {
+      font-weight: 600;
+      color: #C9A368;
+    }
+    
+    .invitation-text {
+      font-size: 16px;
+      margin: 25px 0 35px 0;
+      line-height: 1.7;
+      color: #444444;
+    }
+    
+    .event-details {
+      background: linear-gradient(135deg, #F5F0E6 0%, #FAF5F0 100%);
+      padding: 35px;
+      border-radius: 16px;
+      margin: 35px 0;
+      border: 1px solid rgba(201, 163, 104, 0.1);
+      position: relative;
+    }
+    
+    .event-details::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #C9A368, #D4B377, #C9A368);
+    }
+    
+    .event-title {
+      font-family: 'Playfair Display', serif;
+      color: #1D3557;
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 25px 0;
+      text-align: center;
+      letter-spacing: -0.3px;
+    }
+    
+    .detail-item {
+      margin: 18px 0;
+      display: table;
+      width: 100%;
+      font-size: 16px;
+      color: #1D3557;
+    }
+    
+    .detail-icon {
+      display: table-cell;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #C9A368, #D4B377);
+      border-radius: 12px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(201, 163, 104, 0.2);
+    }
+    
+    .detail-text {
+      display: table-cell;
+      padding-left: 20px;
+      vertical-align: middle;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    
+    .event-description {
+      margin-top: 25px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      font-style: italic;
+      color: #666;
+      border-left: 4px solid #C9A368;
+    }
+    
+    .cta-section {
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .cta-text {
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #444444;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #C9A368 0%, #D4B377 100%);
+      color: white !important;
+      padding: 18px 40px;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 8px 25px rgba(201, 163, 104, 0.3);
+      text-transform: uppercase;
+    }
+    
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #C9A368, transparent);
+      margin: 30px 0;
+    }
+    
+    .closing-message {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #444444;
+      margin: 35px 0;
+      text-align: center;
+    }
+    
+    .signature {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1D3557;
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .footer {
+      background: linear-gradient(135deg, #F5F0E6 0%, #E8DDD4 100%);
+      padding: 30px 40px;
+      text-align: center;
+      border-top: 1px solid rgba(201, 163, 104, 0.1);
+    }
+    
+    .footer-content {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .wedvite-branding {
+      margin-top: 15px;
+      font-weight: 600;
+      color: #C9A368;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Mobile Responsive */
+    @media only screen and (max-width: 600px) {
+      .container {
+        border-radius: 12px;
+        margin: 10px;
+      }
+      .header {
+        padding: 35px 25px;
+      }
+      .invitation-title {
+        font-size: 32px;
+      }
+      .content {
+        padding: 35px 25px;
+      }
+      .event-details {
+        padding: 25px 20px;
+      }
+      .footer {
+        padding: 25px 20px;
+      }
+      .cta-button {
+        padding: 15px 30px;
+        font-size: 15px;
+      }
+      .detail-icon {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  </style>
+</head>
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 5px;
+      background-color: #C9A368; /* gold-foil */
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    @media screen and (max-width: 600px) {
+      .full-width-image img {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .block-wrapper {
+        display: block !important;
+        width: 100% !important;
+      }
+      .padding-reset {
+        padding: 0 !important;
+      }
+      .mobile-padding {
+        padding: 20px !important;
+      }
+      .mobile-center {
+        text-align: center !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 20px; background: linear-gradient(135deg, #F5F0E6 0%, #FFFFFF 100%);">
+  <center>
+    <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
+      ✨ You're invited to a beautiful celebration! Join us for an unforgettable event.
+    </div>
+    
+    <div class="container">
+      <div class="decorative-border"></div>
+      
+      <div class="header">
+        <h1 class="invitation-title">✨ You're Invited ✨</h1>
+        <p class="invitation-subtitle">Join us for a celebration of love and joy</p>
+      </div>
+      
+      <div class="content">
+        <p class="greeting">Dear <span class="guest-name">[Guest Name]</span>,</p>
+        
+        <p class="invitation-text">
+          We joyfully invite you to celebrate with us at our special event. 
+          Your presence would make our celebration complete and meaningful.
+        </p>
+        
+        <div class="event-details">
+          <h3 class="event-title">[Event Name]</h3>
+          
+          <div class="detail-item">
+            <div class="detail-icon">📅</div>
+            <div class="detail-text">
+              <strong>[Event Date]</strong>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <div class="detail-icon">🕐</div>
+            <div class="detail-text">
+              <strong>[Event Time]</strong>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <div class="detail-icon">📍</div>
+            <div class="detail-text">
+              <strong>[Event Location]</strong>
+            </div>
+          </div>
+          
+          <div class="event-description">
+            <p>[Event Description]</p>
+          </div>
+        </div>
+        
+        <div class="cta-section">
+          <p class="cta-text">
+            Click the button below to view your personalized invitation and let us know if you'll be joining us:
+          </p>
+          
+          <a href="[RSVP Link]" class="cta-button">
+            View Invitation & RSVP
+          </a>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <p class="closing-message">
+          We can't wait to celebrate this special moment with you. 
+          Your presence will make our day even more memorable!
+        </p>
+        
+        <p class="signature">
+          With love and excitement,<br>
+          The Wedding Team 💕
+        </p>
+      </div>
+      
+      <div class="footer">
+        <div class="footer-content">
+          <p>This invitation was sent via WedVite - Digital Wedding Invitations</p>
+          <p>If you have any issues accessing your invitation, please contact us directly.</p>
+          <div class="wedvite-branding">WedVite ✨ Making celebrations beautiful</div>
+        </div>
+      </div>
+    </div>
+  </center>
+</body>
+</html>
