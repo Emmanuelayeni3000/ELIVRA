@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { generateQRCode } from '@/lib/qr-code';
 import { sendEventEmail } from '@/lib/send-event-email';
 
 // GET /api/invites - Get all invites for user's events
@@ -51,6 +50,8 @@ export async function GET(request: NextRequest) {
             title: true,
             date: true,
             location: true,
+            type: true,
+            hashtag: true,
           },
         },
       },
@@ -73,9 +74,9 @@ export async function GET(request: NextRequest) {
 
     const statistics = {
       total,
-      attending: stats.find(s => s.rsvpStatus === 'attending')?._count.rsvpStatus || 0,
-      notAttending: stats.find(s => s.rsvpStatus === 'not-attending')?._count.rsvpStatus || 0,
-      pending: stats.find(s => s.rsvpStatus === 'pending')?._count.rsvpStatus || 0,
+      accepted: stats.find(s => s.rsvpStatus === 'accepted')?._count.rsvpStatus || 0,
+      declined: stats.find(s => s.rsvpStatus === 'declined')?._count.rsvpStatus || 0,
+      pending: stats.find(s => s.rsvpStatus === 'pending' || !s.rsvpStatus)?._count.rsvpStatus || 0,
     };
 
     return NextResponse.json({
@@ -141,8 +142,8 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Generate unique QR code
-        const qrCode = await generateQRCode(`${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+        // Generate unique token for QR code and RSVP link
+        const rsvpToken = `invite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
         const invite = await prisma.invite.create({
           data: {
@@ -151,7 +152,8 @@ export async function POST(request: NextRequest) {
             email: guest.email,
             // phone field removed (not in schema)
             guestCount: guest.guestCount || 1,
-            qrCode,
+            guestLimit: guest.guestLimit || 1, // Add guest limit
+            qrCode: rsvpToken, // Store the token, not the full URL
             rsvpStatus: 'pending',
           },
           include: { event: true },
@@ -164,7 +166,7 @@ export async function POST(request: NextRequest) {
           if (!invite.email) {
             errors.push({ email: '(missing)', error: 'Invite has no email, cannot send' });
           } else {
-            const rsvpLink = `${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${invite.id}`; // Use invite id for link
+            const rsvpLink = `${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${rsvpToken}`; // Use the same token
             await sendEventEmail({
               type: 'invitation',
               to: invite.email, // safe: guarded above
@@ -173,11 +175,13 @@ export async function POST(request: NextRequest) {
               data: {
                 guestName: invite.guestName,
                 eventTitle: event.title,
+                eventType: event.type,
                 eventDate: new Date(event.date).toLocaleDateString('en-US', {
                   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
                 }),
                 eventTime: event.time || '',
                 eventLocation: event.location,
+                eventDressCode: event.dressCode || '',
                 rsvpLink,
                 rsvpDate: new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
               },

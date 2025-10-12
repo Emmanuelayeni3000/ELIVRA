@@ -8,7 +8,6 @@ import { authOptions } from '@/lib/auth';
 const updateGuestSchema = z.object({
   guestName: z.string().min(1, 'Guest name is required').optional(),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
   rsvpStatus: z.enum(['PENDING', 'CONFIRMED', 'DECLINED']).optional(),
 });
 
@@ -68,7 +67,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data: {
         ...(validatedData.guestName !== undefined && { guestName: validatedData.guestName }),
         ...(validatedData.email !== undefined && { email: validatedData.email === '' ? null : validatedData.email }),
-        ...(validatedData.phone !== undefined && { phone: validatedData.phone === '' ? null : validatedData.phone }),
         ...(validatedData.rsvpStatus !== undefined && { rsvpStatus: validatedData.rsvpStatus }),
       },
       include: {
@@ -111,7 +109,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       data: {
         ...(validatedData.guestName !== undefined && { guestName: validatedData.guestName }),
         ...(validatedData.email !== undefined && { email: validatedData.email === '' ? null : validatedData.email }),
-        ...(validatedData.phone !== undefined && { phone: validatedData.phone === '' ? null : validatedData.phone }),
         ...(validatedData.rsvpStatus !== undefined && { rsvpStatus: validatedData.rsvpStatus }),
       },
     });

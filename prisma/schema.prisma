@@ -27,10 +27,14 @@ model User {
 model Event {
   id          String   @id @default(uuid())
   title       String
+  type        String   @default("wedding") // 'wedding', 'reception', 'shower', 'rehearsal', 'other'
   date        DateTime
   time        String?
   location    String
   description String?
+  hashtag     String?  // Wedding hashtag like #TobiMart2025
+  guestLimit  Int?     // Maximum number of guests for this event
+  dressCode   String?  // Dress code colour for the event
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -54,7 +58,6 @@ model Invite {
   id         String    @id @default(uuid())
   guestName  String
   email      String?
-  phone      String?
   qrCode     String    @unique
   message    String?
   sentAt     DateTime?
@@ -62,7 +65,7 @@ model Invite {
   rsvpAt     DateTime?
   rsvpStatus String?   // 'pending' | 'accepted' | 'declined'
   guestCount Int? // Added guestCount field
-  dietaryRequirements String? // Added dietaryRequirements field
+  guestLimit Int?      // Maximum number of guests this person can invite
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   

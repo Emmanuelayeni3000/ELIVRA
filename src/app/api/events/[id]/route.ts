@@ -7,10 +7,12 @@ import { authOptions } from '@/lib/auth';
 // Schema for updating an event
 const updateEventSchema = z.object({
   title: z.string().min(1, 'Event title is required').optional(),
+  type: z.enum(['wedding', 'reception', 'shower', 'rehearsal', 'other']).optional(),
   date: z.string().min(1, 'Event date is required').optional(),
   time: z.string().optional(),
   location: z.string().min(1, 'Event location is required').optional(),
   description: z.string().optional(),
+  hashtag: z.string().optional(),
 });
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -59,10 +61,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       },
       data: {
         ...(validatedData.title && { title: validatedData.title }),
+        ...(validatedData.type && { type: validatedData.type }),
         ...(validatedData.date && { date: new Date(validatedData.date) }),
         ...(validatedData.time && { time: validatedData.time }),
         ...(validatedData.location && { location: validatedData.location }),
         ...(validatedData.description && { description: validatedData.description }),
+        ...(validatedData.hashtag !== undefined && { hashtag: validatedData.hashtag || null }),
       },
     });
 

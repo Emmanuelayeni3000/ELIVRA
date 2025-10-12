@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { generateQRCodeDataURL } from '@/lib/qr-code';
 import { sendEmail } from '@/lib/resend';
 import { format } from 'date-fns';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -30,7 +31,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     if (event.invites.length === 0) {
-      return NextResponse.json({ message: 'No guests to send invitations to for this event.' }, { status: 200 });
+      return NextResponse.json({ error: 'No guests have been added to this event yet. Please add guests before sending invitations.' }, { status: 400 });
     }
 
     let sentCount = 0;
@@ -45,8 +46,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
 
       try {
-        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invite.id}`;
-        const qrCodeDataURL = await generateQRCodeDataURL(inviteLink);
+        const token = invite.qrCode?.includes('/')
+          ? invite.qrCode.split('/').filter(Boolean).pop() || invite.id
+          : invite.qrCode ?? invite.id;
+  const rsvpLink = `${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${token}`;
+  const smartLink = `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${token}`;
+  const qrCodeDataURL = await generateQRCodeDataURL(smartLink);
 
         const emailHtml = `
           <h1>Hello ${invite.guestName},</h1>
@@ -55,7 +60,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           <p>Location: ${event.location}</p>
           <p>Scan the QR code below for your digital invitation:</p>
           <img src="${qrCodeDataURL}" alt="QR Code for your invitation" />
-          <p>Or click here: <a href="${inviteLink}">${inviteLink}</a></p>
+          <p>Or start by confirming here: <a href="${rsvpLink}">${rsvpLink}</a></p>
           <p>We look forward to celebrating with you!</p>
           <p>Best regards,</p>
           <p>The WedVite Team</p>

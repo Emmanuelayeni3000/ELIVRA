@@ -46,12 +46,14 @@ export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [eventType, setEventType] = useState<EventType>('all');
   const [sendingStatus, setSendingStatus] = useState<{ [key: string]: string }>({});
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/events');
       const data = await response.json();
 
@@ -61,9 +63,12 @@ export default function EventsPage() {
       }
 
       setEvents(data.events);
+      setError(null); // Clear any previous errors
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
       setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,6 +99,18 @@ export default function EventsPage() {
     fetchEvents();
   }, []);
 
+  // Refetch events when page becomes visible (e.g., coming back from create/edit)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchEvents();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const handleDelete = async (eventId: string) => {
     try {
       const response = await fetch(`/api/events/${eventId}`, {
@@ -107,7 +124,7 @@ export default function EventsPage() {
       }
 
       toast.success('Event deleted successfully');
-      fetchEvents();
+      await fetchEvents();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred during deletion.';
       toast.error(errorMessage);
@@ -123,27 +140,47 @@ export default function EventsPage() {
         body: JSON.stringify({ baseUrl: process.env.NEXT_PUBLIC_APP_URL }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
         setSendingStatus((prev) => ({ ...prev, [eventId]: 'failed' }));
-        toast.error(data.error || 'Failed to send invitations.');
+        
+        // Try to get error message from response
+        let errorMessage = 'Failed to send invitations';
+        try {
+          const data = await response.json();
+          errorMessage = data.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        
+        // Show specific error messages based on status code
+        if (response.status === 401) {
+          errorMessage = 'You are not authorized to send invitations. Please sign in again.';
+        } else if (response.status === 404) {
+          errorMessage = 'Event not found or you do not have permission to access it.';
+        } else if (response.status === 400 && errorMessage.includes('No guests')) {
+          errorMessage = 'Please add guests to this event before sending invitations.';
+        }
+        
+        toast.error(errorMessage);
         return;
       }
 
+      await response.json(); // Consume the response
       setSendingStatus((prev) => ({ ...prev, [eventId]: 'sent' }));
       toast.success('Invitations sent successfully!');
-      fetchEvents();
+      await fetchEvents();
     } catch (err: unknown) {
       setSendingStatus((prev) => ({ ...prev, [eventId]: 'failed' }));
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred during sending.';
+      console.error('Network error sending invitations:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Network error occurred. Please check your connection and try again.';
       toast.error(errorMessage);
     }
   };
 
   
 
-  if (error) {
+  if (error && !loading) {
     return (
       <Card className="w-full max-w-4xl mx-auto shadow-stats-card bg-destructive/10">
         <CardHeader>
@@ -205,7 +242,46 @@ export default function EventsPage() {
         </Select>
       </div>
 
-      {filteredEvents.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="col-span-1 wedding-elevated-card">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                  <div className="flex space-x-2">
+                    <Skeleton className="h-8 w-8 rounded" />
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <Skeleton className="h-4 w-4 mr-2" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex items-center">
+                    <Skeleton className="h-4 w-4 mr-2" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                  <div className="flex items-center">
+                    <Skeleton className="h-4 w-4 mr-2" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-28" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredEvents.length === 0 ? (
         <Card className="w-full text-center wedding-elevated-card">
           <CardContent className="p-12">
             <div className="flex flex-col items-center space-y-4">
@@ -272,10 +348,25 @@ export default function EventsPage() {
                       Edit
                     </Button>
                   </Link>
-                  <Button variant="default" size="sm" onClick={() => handleSendInvitations(event.id)} disabled={sendingStatus[event.id] === 'sending'} className="btn-gradient-primary font-inter font-medium text-xs px-5 py-2 h-auto disabled:opacity-70">
-                    <Send className="mr-2 h-4 w-4" />
-                    {sendingStatus[event.id] === 'sending' ? 'Sending...' : 'Send Invites'}
-                  </Button>
+                  {(!event.guests || event.guests.length === 0) ? (
+                    <Link href={`/dashboard/guests?eventId=${event.id}`}>
+                      <Button variant="outline" size="sm" className="btn-outline-gold font-inter font-medium text-xs px-5 py-2 h-auto">
+                        <Users className="mr-2 h-4 w-4" />
+                        Add Guests
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={() => handleSendInvitations(event.id)} 
+                      disabled={sendingStatus[event.id] === 'sending'} 
+                      className="btn-gradient-primary font-inter font-medium text-xs px-5 py-2 h-auto disabled:opacity-70"
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      {sendingStatus[event.id] === 'sending' ? 'Sending...' : 'Send Invites'}
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

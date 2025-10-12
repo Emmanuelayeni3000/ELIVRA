@@ -8,12 +8,38 @@ export async function GET(
 ) {
   try {
     const { token } = await params;
-    const invite = await prisma.invite.findUnique({
+    
+    // First try to find by qrCode token (new format)
+    let invite = await prisma.invite.findUnique({
       where: { qrCode: token },
       include: {
         event: true,
       },
     });
+
+    // If not found, try to find by qrCode containing the token (old format fallback)
+    if (!invite) {
+      invite = await prisma.invite.findFirst({
+        where: {
+          qrCode: {
+            contains: token
+          }
+        },
+        include: {
+          event: true,
+        },
+      });
+    }
+
+    // If still not found, try looking up by invite ID (legacy fallback)
+    if (!invite) {
+      invite = await prisma.invite.findUnique({
+        where: { id: token },
+        include: {
+          event: true,
+        },
+      });
+    }
 
     if (!invite) {
       return new NextResponse(
@@ -44,6 +70,7 @@ export async function GET(
           date: invite.event.date,
           location: invite.event.location,
           description: invite.event.description,
+          guestLimit: invite.event.guestLimit,
         },
       })
     );
@@ -63,14 +90,39 @@ export async function POST(
   try {
     const { token } = await params;
     const body = await request.json();
-    const { response, guestCount, dietaryRequirements, message } = body;
+  const { response, guestCount, guestEmails, message } = body;
 
-    const invite = await prisma.invite.findUnique({
+    // First try to find by qrCode token (new format)
+    let invite = await prisma.invite.findUnique({
       where: { qrCode: token },
       include: {
         event: true,
       },
     });
+
+    // If not found, try to find by qrCode containing the token (old format fallback)
+    if (!invite) {
+      invite = await prisma.invite.findFirst({
+        where: {
+          qrCode: {
+            contains: token
+          }
+        },
+        include: {
+          event: true,
+        },
+      });
+    }
+
+    // If still not found, try looking up by invite ID (legacy fallback)
+    if (!invite) {
+      invite = await prisma.invite.findUnique({
+        where: { id: token },
+        include: {
+          event: true,
+        },
+      });
+    }
 
     if (!invite) {
       return new NextResponse(
@@ -86,38 +138,94 @@ export async function POST(
       );
     }
 
+    const normalizedGuestEmails = Array.isArray(guestEmails)
+      ? guestEmails
+          .map((email: unknown) => (typeof email === 'string' ? email.trim() : ''))
+          .filter((email: string) => email.length > 0)
+      : [];
+
+    if (response === 'attending') {
+      const expectedGuests = Math.max(0, (guestCount ?? 1) - 1);
+      if (normalizedGuestEmails.length !== expectedGuests) {
+        return new NextResponse(
+          JSON.stringify({ error: `Please provide exactly ${expectedGuests} guest email${expectedGuests === 1 ? '' : 's'}.` }),
+          { status: 400 }
+        );
+      }
+
+      const invalidEmails = normalizedGuestEmails.filter(
+        (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      );
+      if (invalidEmails.length > 0) {
+        return new NextResponse(
+          JSON.stringify({ error: `Invalid guest email${invalidEmails.length === 1 ? '' : 's'} supplied: ${invalidEmails.join(', ')}` }),
+          { status: 400 }
+        );
+      }
+    }
+
     const updatedInvite = await prisma.invite.update({
       where: { id: invite.id },
       data: {
         rsvpStatus: response,
         guestCount: guestCount || 1,
-        dietaryRequirements,
         message: message, // Use message from body for rsvpMessage
         rsvpAt: new Date(),
       },
     });
 
-    // Send confirmation email to guest
-    await sendEventEmail({
-      type: 'rsvp-confirmation',
-      to: invite.email,
-      subject: `RSVP Confirmation - ${invite.event.title}`,
-      baseUrl: process.env.NEXT_PUBLIC_APP_URL as string, // Add baseUrl
-      data: {
-        guestName: invite.guestName,
-        eventTitle: invite.event.title,
-        eventDate: new Date(invite.event.date).toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        eventLocation: invite.event.location,
-        response,
-        additionalGuests: guestCount,
-        dietaryRequirements,
-      },
-    });
+    // Send confirmation email to guest (only if email exists)
+    if (invite.email) {
+      await sendEventEmail({
+        type: 'rsvp-confirmation',
+        to: invite.email,
+        subject: `RSVP Confirmation - ${invite.event.title}`,
+        baseUrl: process.env.NEXT_PUBLIC_APP_URL as string, // Add baseUrl
+        data: {
+          guestName: invite.guestName,
+          eventTitle: invite.event.title,
+          eventDate: new Date(invite.event.date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          eventLocation: invite.event.location,
+          response,
+          additionalGuests: guestCount,
+        },
+      });
+    }
+
+    // Notify additional guest emails if provided and RSVP is attending
+    if (response === 'attending' && normalizedGuestEmails.length > 0) {
+      const eventDateFormatted = new Date(invite.event.date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
+      await Promise.all(
+        normalizedGuestEmails.map((email) =>
+          sendEventEmail({
+            type: 'companion-invite',
+            to: email,
+            subject: `${invite.guestName} invited you to ${invite.event.title}`,
+            baseUrl: process.env.NEXT_PUBLIC_APP_URL as string,
+            data: {
+              guestName: invite.guestName,
+              primaryGuestName: invite.guestName,
+              eventTitle: invite.event.title,
+              eventDate: eventDateFormatted,
+              eventLocation: invite.event.location,
+              eventTime: invite.event.time ?? '',
+              message: message || '',
+            },
+          })
+        )
+      );
+    }
 
     // Notify event owner
     const eventOwner = await prisma.user.findUnique({

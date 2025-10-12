@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CustomCalendar } from '@/components/ui/custom-calendar';
 import {
   Select,
   SelectContent,
@@ -27,15 +27,25 @@ import { toast } from 'sonner';
 const createEventSchema = z.object({
 	title: z.string().min(1, 'Event title is required'),
 	type: z.enum(['wedding', 'reception', 'shower', 'rehearsal', 'other']).describe('Please select an event type'),
+	customType: z.string().optional(),
 	date: z.date({
 		message: 'Please select a date',
 	}),
 	time: z.string().optional(),
 	location: z.string().min(1, 'Event location is required'),
 	description: z.string().optional(),
+	hashtag: z.string().optional(),
 	capacity: z.number().min(1, 'Capacity must be at least 1').optional(),
 	dressCode: z.string().optional(),
 	additionalInfo: z.string().optional(),
+}).refine((data) => {
+	if (data.type === 'other' && (!data.customType || data.customType.trim() === '')) {
+		return false;
+	}
+	return true;
+}, {
+	message: 'Custom event type is required when "Other" is selected',
+	path: ['customType'],
 });
 
 type CreateEventFormValues = z.infer<typeof createEventSchema>;
@@ -144,6 +154,29 @@ export default function CreateEventPage() {
 							</div>
 						</div>
 
+						{/* Custom Event Type Input - Shows when "other" is selected */}
+						{watch('type') === 'other' && (
+							<div className="space-y-2">
+								<Label className="text-royal-navy font-inter flex items-center gap-2">
+									<Type className="h-4 w-4" />
+									Custom Event Type
+								</Label>
+								<Input
+									placeholder="e.g., Birthday Party, Anniversary, Engagement"
+									{...register('customType')}
+									disabled={isSubmitting}
+									className="input-elevated h-12"
+								/>
+								{errors.customType && (
+									<p className="text-sm text-destructive font-inter">{errors.customType.message}</p>
+								)}
+							</div>
+						)}
+
+						{/* Restore the original grid container */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						</div>
+
 						{/* Date and Time */}
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							<div className="space-y-2">
@@ -167,13 +200,13 @@ export default function CreateEventPage() {
 											)}
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="p-0 bg-white w-80" align="start">
-										<Calendar
-											mode="single"
+									<PopoverContent className="wedding-elevated-card p-0 w-auto" align="start">
+										<CustomCalendar
 											selected={watch('date')}
-											onSelect={(date) => date && setValue('date', date)}
-											initialFocus
-											className="w-full"
+											onSelect={(date) => setValue('date', date)}
+											disabled={isSubmitting}
+											fromDate={new Date()}
+											toDate={new Date(new Date().getFullYear() + 2, 11, 31)}
 										/>
 									</PopoverContent>
 								</Popover>
@@ -342,6 +375,42 @@ export default function CreateEventPage() {
 								className="input-elevated min-h-[120px]"
 							/>
 						</div>
+
+						{/* Dress Code */}
+						<div className="space-y-2">
+							<Label className="text-royal-navy font-inter flex items-center gap-2">
+								<span className="text-gold-foil">🎨</span>
+								Dress Code Colour
+							</Label>
+							<Input
+								placeholder="e.g., Navy Blue, Burgundy, Sage Green, Black"
+								{...register('dressCode')}
+								disabled={isSubmitting}
+								className="input-elevated h-12"
+							/>
+							<p className="text-xs text-slate-gray font-inter">
+								Specify a color theme to help your guests coordinate their attire.
+							</p>
+						</div>
+
+						{/* Wedding Hashtag - Only show for wedding and reception */}
+						{(watch('type') === 'wedding' || watch('type') === 'reception') && (
+							<div className="space-y-2">
+								<Label className="text-royal-navy font-inter flex items-center gap-2">
+									<span className="text-gold-foil">#</span>
+									Wedding Hashtag
+								</Label>
+								<Input
+									placeholder="e.g., #TobiMart2025"
+									{...register('hashtag')}
+									disabled={isSubmitting}
+									className="input-elevated h-12"
+								/>
+								<p className="text-xs text-slate-gray font-inter">
+									Perfect for social media! Guests can use this hashtag when sharing photos and memories.
+								</p>
+							</div>
+						)}
 
 						{error && (
 							<div className="bg-destructive/10 p-3 rounded-md">

@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
@@ -20,15 +18,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const updateEventSchema = z.object({
-	title: z.string().min(1, 'Event title is required'),
-	date: z.string().min(1, 'Event date is required'),
-	time: z.string().optional(),
-	location: z.string().min(1, 'Event location is required'),
-	description: z.string().optional(),
-});
-
-type UpdateEventFormValues = z.infer<typeof updateEventSchema>;
+type UpdateEventFormValues = {
+	title: string;
+	type: 'wedding' | 'reception' | 'shower' | 'rehearsal' | 'other';
+	date: string;
+	time?: string;
+	location: string;
+	description?: string;
+	hashtag?: string;
+};
 
 // NOTE: Using Promise-based params type to align with Next.js generated PageProps expectation
 // The build currently expects params to be a Promise; we unwrap it into local state.
@@ -37,6 +35,18 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
 
+	const form = useForm<UpdateEventFormValues>({
+		defaultValues: {
+			title: '',
+			type: 'wedding',
+			date: '',
+			time: '',
+			location: '',
+			description: '',
+			hashtag: '',
+		},
+	});
+
 	const {
 		register,
 		handleSubmit,
@@ -44,9 +54,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 		formState: { errors, isSubmitting },
 		watch,
 		setValue,
-	} = useForm<UpdateEventFormValues>({
-		resolver: zodResolver(updateEventSchema),
-	});
+	} = form;
 
 	// Resolve params promise once (client component) and set id
 	useEffect(() => {
@@ -71,10 +79,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 				// Populate form with fetched data
 				reset({
 					title: data.event.title,
+					type: data.event.type || 'wedding',
 					date: format(new Date(data.event.date), 'yyyy-MM-dd'), // Format date for input type="date"
 					time: data.event.time || '',
 					location: data.event.location,
 					description: data.event.description || '',
+					hashtag: data.event.hashtag || '',
 				});
 			} catch (err: unknown) { // Fixed 'any' to 'unknown'
 				setError(err instanceof Error ? err.message : 'An unexpected error occurred while fetching event.');
@@ -86,6 +96,21 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
 	const onSubmit = async (values: UpdateEventFormValues) => {
 		setError(null);
+
+		// Basic validation
+		if (!values.title?.trim()) {
+			setError('Event title is required');
+			return;
+		}
+		if (!values.date?.trim()) {
+			setError('Event date is required');
+			return;
+		}
+		if (!values.location?.trim()) {
+			setError('Event location is required');
+			return;
+		}
+
 		try {
 			const response = await fetch(`/api/events/${id}`, {
 				method: 'PUT',
@@ -143,6 +168,28 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 							/>
 							{errors.title && <p className="text-sm text-blush font-inter">{errors.title.message}</p>} {/* Applied typography */}
 						</div>
+
+						<div className="grid gap-2">
+							<Label htmlFor="type" className="text-royal-navy font-inter">Event Type</Label>
+							<Select
+								value={watch('type')}
+								onValueChange={(value) => setValue('type', value as UpdateEventFormValues['type'])}
+								disabled={isSubmitting}
+							>
+								<SelectTrigger className="input-elevated h-12">
+									<SelectValue placeholder="Select event type" />
+								</SelectTrigger>
+								<SelectContent className="bg-white">
+									<SelectItem value="wedding">Wedding Ceremony</SelectItem>
+									<SelectItem value="reception">Wedding Reception</SelectItem>
+									<SelectItem value="shower">Bridal/Baby Shower</SelectItem>
+									<SelectItem value="rehearsal">Rehearsal Dinner</SelectItem>
+									<SelectItem value="other">Other Celebration</SelectItem>
+								</SelectContent>
+							</Select>
+							{errors.type && <p className="text-sm text-blush font-inter">{errors.type.message}</p>}
+						</div>
+
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6"> {/* Adjusted spacing */}
 							<div className="grid gap-2">
 								<Label htmlFor="date" className="text-royal-navy font-inter">Date</Label> {/* Applied typography */}
@@ -157,110 +204,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 							</div>
 							<div className="grid gap-2">
 								<Label htmlFor="time" className="text-royal-navy font-inter">Time (Optional)</Label>
-								<div className="flex gap-2">
-									<div className="flex-1">
-										<Label className="text-xs text-slate-gray font-inter">Hour</Label>
-										<Select
-											value={(() => {
-												const time = watch('time');
-												if (!time) return '';
-												const [hourStr] = time.split(':');
-												if (!hourStr) return '';
-												const hour24 = parseInt(hourStr);
-												const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-												return hour12.toString();
-											})()}
-											onValueChange={(value) => {
-												const currentTime = watch('time') || '00:00';
-												const [, minutePart] = currentTime.split(':');
-												const minute = minutePart ? minutePart.split(' ')[0] : '00';
-												const isPM = currentTime.includes('PM');
-												const hour12 = parseInt(value);
-												const hour24 = isPM ? (hour12 === 12 ? 12 : hour12 + 12) : (hour12 === 12 ? 0 : hour12);
-												const newTime = `${hour24.toString().padStart(2, '0')}:${minute}`;
-												setValue('time', newTime);
-											}}
-											disabled={isSubmitting}
-										>
-											<SelectTrigger className="input-elevated h-10">
-												<SelectValue placeholder="Hour" />
-											</SelectTrigger>
-											<SelectContent className="bg-white max-h-32 overflow-y-auto">
-												{Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
-													<SelectItem key={hour} value={hour.toString()} className="hover:bg-royal-navy hover:text-white cursor-pointer">
-														{hour}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="flex-1">
-										<Label className="text-xs text-slate-gray font-inter">Minute</Label>
-										<Select
-											value={(() => {
-												const time = watch('time');
-												if (!time) return '';
-												const [, minutePart] = time.split(':');
-												return minutePart ? minutePart.split(' ')[0] : '00';
-											})() || ''}
-											onValueChange={(value) => {
-												const currentTime = watch('time') || '00:00';
-												const [hourPart] = currentTime.split(':');
-												const newTime = `${hourPart}:${value}`;
-												setValue('time', newTime);
-											}}
-											disabled={isSubmitting}
-										>
-											<SelectTrigger className="input-elevated h-10">
-												<SelectValue placeholder="Min" />
-											</SelectTrigger>
-											<SelectContent className="bg-white max-h-32 overflow-y-auto">
-												{Array.from({ length: 12 }, (_, i) => i * 5).map(minute => (
-													<SelectItem key={minute} value={minute.toString().padStart(2, '0')} className="hover:bg-royal-navy hover:text-white cursor-pointer">
-														{minute.toString().padStart(2, '0')}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="flex-1">
-										<Label className="text-xs text-slate-gray font-inter">AM/PM</Label>
-										<Select
-											value={(() => {
-												const time = watch('time');
-												if (!time) return '';
-												const [hourStr] = time.split(':');
-												if (!hourStr) return '';
-												const hour24 = parseInt(hourStr);
-												return hour24 >= 12 ? 'PM' : 'AM';
-											})() || ''}
-											onValueChange={(value) => {
-												const currentTime = watch('time') || '00:00';
-												const [hourPart, minutePart] = currentTime.split(':');
-												if (!hourPart) return;
-												const hour24 = parseInt(hourPart);
-												let newHour24 = hour24;
-												if (value === 'PM' && hour24 < 12) {
-													newHour24 = hour24 === 0 ? 12 : hour24 + 12;
-												} else if (value === 'AM' && hour24 >= 12) {
-													newHour24 = hour24 === 12 ? 0 : hour24 - 12;
-												}
-												const minute = minutePart ? minutePart.split(' ')[0] : '00';
-												const newTime = `${newHour24.toString().padStart(2, '0')}:${minute}`;
-												setValue('time', newTime);
-											}}
-											disabled={isSubmitting}
-										>
-											<SelectTrigger className="input-elevated h-10">
-												<SelectValue placeholder="AM/PM" />
-											</SelectTrigger>
-											<SelectContent className="bg-white max-h-32 overflow-y-auto">
-												<SelectItem value="AM" className="hover:bg-royal-navy hover:text-white cursor-pointer">AM</SelectItem>
-												<SelectItem value="PM" className="hover:bg-royal-navy hover:text-white cursor-pointer">PM</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
+								<Input
+									id="time"
+									type="time"
+									{...register('time')}
+									disabled={isSubmitting}
+									className="input-elevated h-12"
+								/>
+								{errors.time && <p className="text-sm text-blush font-inter">{errors.time.message}</p>}
 							</div>
 						</div>
 						<div className="grid gap-2">
@@ -285,6 +236,27 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 								className="input-elevated min-h-[120px]"
 							/>
 						</div>
+
+						{/* Wedding Hashtag - Only show for wedding and reception */}
+						{(watch('type') === 'wedding' || watch('type') === 'reception') && (
+							<div className="grid gap-2">
+								<Label htmlFor="hashtag" className="text-royal-navy font-inter flex items-center gap-2">
+									<span className="text-gold-foil">#</span>
+									Wedding Hashtag (Optional)
+								</Label>
+								<Input
+									id="hashtag"
+									placeholder="e.g., #TobiMart2025"
+									{...register('hashtag')}
+									disabled={isSubmitting}
+									className="input-elevated h-12"
+								/>
+								<p className="text-xs text-slate-gray font-inter">
+									Perfect for social media! Guests can use this hashtag when sharing photos and memories.
+								</p>
+							</div>
+						)}
+						
 						{error && <p className="text-center text-sm text-blush font-inter">{error}</p>} {/* Applied typography */}
 						<div className="flex gap-4 pt-2">
 							<Button

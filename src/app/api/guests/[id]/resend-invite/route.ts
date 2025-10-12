@@ -36,8 +36,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Guest does not have an email address' }, { status: 400 });
     }
 
-    // Create invitation link
-    const inviteLink = `${baseUrl || process.env.NEXT_PUBLIC_APP_URL}/invite/${guest.id}`;
+  // Create RSVP-first link using guest token
+    const token = guest.qrCode?.includes('/')
+      ? guest.qrCode.split('/').filter(Boolean).pop() || guest.id
+      : guest.qrCode ?? guest.id;
+    const inviteLink = `${baseUrl || process.env.NEXT_PUBLIC_APP_URL}/rsvp/${token}`;
 
     // Enhanced Beautiful Email Template
     const emailHtml = `
@@ -363,11 +366,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               
               <div class="cta-section">
                 <p class="cta-text">
-                  Click the button below to view your personalized invitation and let us know if you'll be joining us:
+                  Click below to confirm your RSVP first. You'll be taken to your personalized invitation right after:
                 </p>
                 
                 <a href="${inviteLink}" class="cta-button">
-                  View Invitation & RSVP
+                  Review & Confirm RSVP
                 </a>
               </div>
               

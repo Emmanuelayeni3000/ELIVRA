@@ -7,7 +7,6 @@ import { getServerSession } from 'next-auth';
 const addGuestSchema = z.object({
   name: z.string().min(1, 'Guest name is required'),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
 });
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) { // Changed eventId to id
@@ -19,7 +18,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { id } = await params; // Changed eventId to id
     const body = await request.json();
-    const { name, email, phone } = addGuestSchema.parse(body);
+    const { name, email } = addGuestSchema.parse(body);
 
     // Verify that the event belongs to the logged-in user
     const event = await prisma.event.findUnique({
@@ -33,13 +32,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Event not found or unauthorized' }, { status: 404 });
     }
 
+    const token = `invite_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+
     const newGuest = await prisma.invite.create({ // Using Invite model for guests
       data: {
         guestName: name,
         email: email || null, // Store null if email is empty string
-        phone: phone || null, // Store null if phone is empty string
         eventId: id, // Changed eventId to id
-        qrCode: 'temp-qr-code-' + Math.random().toString(36).substring(7), // Placeholder QR code
+        qrCode: token,
         rsvpStatus: 'pending',
       },
     });
