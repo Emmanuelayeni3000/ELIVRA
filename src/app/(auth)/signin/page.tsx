@@ -13,11 +13,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
 import GoogleSignInButton from '@/components/ui/GoogleSignInButton';
 
 const signInSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+  password: z.string()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters long'),
 });
 
 type SignInFormValues = z.infer<typeof signInSchema>;
@@ -38,12 +43,18 @@ export default function SignInPage() {
 
   const onSubmit = async (values: SignInFormValues) => {
     setError(null);
-    const { success, error: authError } = await signIn(values.email, values.password);
+    
+    try {
+      const { success, error: authError } = await signIn(values.email.trim().toLowerCase(), values.password);
 
-    if (success) {
-      router.push('/dashboard');
-    } else {
-      setError(authError || 'An unexpected error occurred during sign-in.');
+      if (success) {
+        router.push('/dashboard');
+      } else {
+        setError(authError || 'Sign-in failed. Please check your credentials and try again.');
+      }
+    } catch (error) {
+      console.error('Sign-in form error:', error);
+      setError('A network error occurred. Please check your connection and try again.');
     }
   };
 
@@ -51,6 +62,16 @@ export default function SignInPage() {
     <div className="flex min-h-screen items-center justify-center bg-pearl-beige p-4">
       <Card className="w-full max-w-md shadow-stats-card bg-[#ffffff]">
         <CardHeader className="text-center">
+          <Link href="/" className="flex justify-center mb-4">
+            <Image
+              src="/images/wedvite-logo.png"
+              alt="WedVite Logo"
+              width={60}
+              height={60}
+              className="hover:opacity-80 transition-opacity duration-200"
+              priority
+            />
+          </Link>
           <CardTitle className="text-3xl font-bold text-[#1D3557] font-playfair-display">Sign In</CardTitle>
           <CardDescription className="text-slate-gray font-inter">
             Enter your credentials to access your WedVite dashboard.
@@ -89,7 +110,18 @@ export default function SignInPage() {
               </button>
               {errors.password && <p className="text-sm text-blush font-inter">{errors.password.message}</p>}
             </div>
-            {error && <p className="text-center text-sm text-blush font-inter">{error}</p>}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600 font-inter text-center">{error}</p>
+                {error.includes('No account found') && (
+                  <p className="text-xs text-red-500 font-inter text-center mt-2">
+                    <Link href="/signup" className="underline hover:text-red-700">
+                      Create a new account instead
+                    </Link>
+                  </p>
+                )}
+              </div>
+            )}
             <Button type="submit" className="w-full bg-[#1D3557] text-[#ffffff] hover:bg-[#1D3557]/80" disabled={isSubmitting}>
               {isSubmitting ? 'Signing In...' : 'Sign In'}
             </Button>

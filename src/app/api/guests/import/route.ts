@@ -3,13 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { generateQRCodeDataURL } from '@/lib/qr-code';
 
 // Define a schema for a single guest row in CSV
 const guestCsvSchema = z.object({
   name: z.string().min(1, 'Guest name is required'),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -55,7 +53,6 @@ export async function POST(request: Request) {
     // Find the column indices
     const nameIndex = headers.findIndex(h => h.includes('name'));
     const emailIndex = headers.findIndex(h => h.includes('email'));
-    const phoneIndex = headers.findIndex(h => h.includes('phone'));
 
     if (nameIndex === -1) {
       return NextResponse.json({ 
@@ -79,21 +76,19 @@ export async function POST(request: Request) {
         const guestData = {
           name: row[nameIndex] || '',
           email: emailIndex !== -1 ? row[emailIndex] || '' : '',
-          phone: phoneIndex !== -1 ? row[phoneIndex] || '' : '',
         };
 
         // Validate guest data
         const validatedGuest = guestCsvSchema.parse(guestData);
 
-        // Generate QR code for the invite
-        const qrCode = await generateQRCodeDataURL(`${process.env.NEXTAUTH_URL}/rsvp/invite-${eventId}-${i}`);
+        // Generate invite link (store link instead of QR code data URL)
+        const inviteLink = `${process.env.NEXTAUTH_URL}/rsvp/invite-${eventId}-${i}`;
 
         guestsToCreate.push({
           guestName: validatedGuest.name,
           email: validatedGuest.email || null,
-          phone: validatedGuest.phone || null,
           eventId: eventId,
-          qrCode: qrCode,
+          qrCode: inviteLink,
           rsvpStatus: 'PENDING',
         });
       } catch (validationError: unknown) {

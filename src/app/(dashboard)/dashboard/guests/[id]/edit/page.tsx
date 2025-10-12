@@ -20,14 +20,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
-import { Loading } from '@/components/loading';
 
 
 const updateGuestSchema = z.object({
 	guestName: z.string().min(1, 'Guest name is required'),
 	email: z.string().email('Invalid email address').optional().or(z.literal('')),
-	phone: z.string().optional(),
 	rsvpStatus: z.enum(['PENDING', 'CONFIRMED', 'DECLINED']),
 });
 
@@ -36,6 +35,7 @@ type UpdateGuestFormValues = z.infer<typeof updateGuestSchema>;
 export default function EditGuestPage({ params }: { params: Promise<{ id: string }> }) {
 	const [id, setId] = useState<string>('');
 	const router = useRouter();
+	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	const form = useForm<UpdateGuestFormValues>({
@@ -43,7 +43,6 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 		defaultValues: {
 			guestName: '',
 			email: '',
-			phone: '',
 			rsvpStatus: 'PENDING',
 		},
 	});
@@ -57,6 +56,7 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 	const fetchGuest = useCallback(async () => {
 		if (!id) return; // Wait for id resolution
 		try {
+			setLoading(true);
 			setError(null);
 			const response = await fetch(`/api/guests/${id}`);
 			if (!response.ok) {
@@ -69,6 +69,8 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 			const errorMessage = err instanceof Error ? err.message : 'Failed to fetch guest';
 			setError(errorMessage);
 			toast.error(errorMessage);
+		} finally {
+			setLoading(false);
 		}
 	}, [id, form]);
 
@@ -106,7 +108,45 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 		});
 	};
 
-	
+	if (loading) {
+		return (
+			<div className="section-frame py-8 space-y-6 animate-fade-up-soft">
+				<Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+					<ArrowLeft className="w-4 h-4 mr-2" />
+					Back
+				</Button>
+
+				<Card className="wedding-elevated-card">
+					<CardHeader>
+						<div className="accent-bar-gold mb-2">
+							<Skeleton className="h-8 w-40" />
+						</div>
+						<Skeleton className="h-4 w-64" />
+					</CardHeader>
+					<CardContent className="space-y-6">
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-16" />
+							<Skeleton className="h-12 w-full" />
+						</div>
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-16" />
+							<Skeleton className="h-12 w-full" />
+							<Skeleton className="h-3 w-48" />
+						</div>
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-20" />
+							<Skeleton className="h-12 w-full" />
+						</div>
+						<div className="flex justify-end space-x-4">
+							<Skeleton className="h-10 w-20" />
+							<Skeleton className="h-10 w-28" />
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
 	if (error) {
 		return (
 			<div className="p-6">
@@ -171,19 +211,6 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 										<FormDescription className="text-slate-gray font-inter">
 											Email is required for sending invitations
 										</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="phone"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="text-royal-navy font-inter">Phone</FormLabel>
-										<FormControl>
-											<Input type="tel" placeholder="Phone number" {...field} className="input-elevated h-12" />
-										</FormControl>
 										<FormMessage />
 									</FormItem>
 								)}

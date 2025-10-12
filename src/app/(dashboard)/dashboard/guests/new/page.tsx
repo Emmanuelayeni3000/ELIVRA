@@ -21,8 +21,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
-import { Loading } from '@/components/loading';
 
 interface Event {
   id: string;
@@ -32,8 +32,8 @@ interface Event {
 const addGuestSchema = z.object({
   eventId: z.string().min(1, 'Please select an event'),
   guestName: z.string().min(1, 'Guest name is required'),
-  email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phone: z.string().optional(),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  guestLimit: z.number().min(1, 'Guest limit must be at least 1').max(10, 'Guest limit cannot exceed 10'),
 });
 
 type AddGuestFormValues = z.infer<typeof addGuestSchema>;
@@ -41,6 +41,7 @@ type AddGuestFormValues = z.infer<typeof addGuestSchema>;
 export default function AddGuestPage() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<AddGuestFormValues>({
@@ -48,18 +49,18 @@ export default function AddGuestPage() {
     defaultValues: {
       guestName: '',
       email: '',
-      phone: '',
       eventId: '',
+      guestLimit: 1,
     },
   });
 
   useEffect(() => {
     fetchEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
       setError(null);
       const response = await fetch('/api/events');
       if (!response.ok) {
@@ -71,6 +72,8 @@ export default function AddGuestPage() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch events';
       setError(errorMessage);
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,6 +107,44 @@ export default function AddGuestPage() {
   };
 
   
+
+  if (loading) {
+    return (
+      <div className="section-frame py-8 space-y-6 animate-fade-up-soft">
+        <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
+        <Card className="wedding-elevated-card">
+          <CardHeader>
+            <div className="accent-bar-gold mb-2">
+              <Skeleton className="h-8 w-48" />
+            </div>
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="flex justify-end gap-4">
+              <Skeleton className="h-10 w-20" />
+              <Skeleton className="h-10 w-28" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -174,7 +215,7 @@ export default function AddGuestPage() {
                       </FormControl>
                       <SelectContent>
                         {events.map((event) => (
-                          <SelectItem key={event.id} value={event.id}>
+                          <SelectItem key={event.id} value={event.id} className="bg-white">
                             {event.title}
                           </SelectItem>
                         ))}
@@ -216,13 +257,27 @@ export default function AddGuestPage() {
 
               <FormField
                 control={form.control}
-                name="phone"
+                name="guestLimit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-royal-navy font-inter">Phone</FormLabel>
-                    <FormControl>
-                      <Input type="tel" placeholder="Phone number" {...field} className="input-elevated h-12" />
-                    </FormControl>
+                    <FormLabel className="text-royal-navy font-inter">Guest Limit</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+                      <FormControl>
+                        <SelectTrigger className="input-elevated h-12">
+                          <SelectValue placeholder="Select guest limit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                          <SelectItem key={num} value={num.toString()} className="bg-white">
+                            {num} {num === 1 ? 'Guest' : 'Guests'} (including themselves)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription className="text-slate-gray font-inter">
+                      Maximum number of guests this person can invite to the event
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

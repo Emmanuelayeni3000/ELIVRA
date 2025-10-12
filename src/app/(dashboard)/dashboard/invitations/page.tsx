@@ -324,26 +324,44 @@ export default function BulkInvitationsPage() {
           </Card>
 
           {/* Action Buttons */}
-          {selectedGuests.length > 0 && (
+          {selectedEvent && (
             <Card className="mb-6 wedding-elevated-card">
               <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="font-medium text-royal-navy">
-                      {selectedGuests.length} guest{selectedGuests.length !== 1 ? 's' : ''} selected
+                {guests.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-slate-gray mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-royal-navy mb-2">No Guests Added</h3>
+                    <p className="text-slate-gray mb-4">
+                      You need to add guests to this event before you can send invitations.
                     </p>
-                    <p className="text-sm text-slate-gray">
-                      Choose an action to perform on the selected guests
-                    </p>
+                    <Button 
+                      onClick={() => {
+                        toast.error('Please add guests to this event first before sending invitations.');
+                      }}
+                      className="btn-outline-gold font-inter font-medium"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Send Invitations
+                    </Button>
                   </div>
-                  <div className="flex space-x-3">
-                    <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
-                      <DialogTrigger asChild>
-                        <Button className="btn-gradient-primary font-inter font-medium" disabled={disableBulkActions}>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Send Invitations
-                        </Button>
-                      </DialogTrigger>
+                ) : selectedGuests.length > 0 ? (
+                  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="font-medium text-royal-navy">
+                        {selectedGuests.length} guest{selectedGuests.length !== 1 ? 's' : ''} selected
+                      </p>
+                      <p className="text-sm text-slate-gray">
+                        Choose an action to perform on the selected guests
+                      </p>
+                    </div>
+                    <div className="flex space-x-3">
+                      <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
+                        <DialogTrigger asChild>
+                          <Button className="btn-gradient-primary font-inter font-medium" disabled={disableBulkActions}>
+                            <Mail className="h-4 w-4 mr-2" />
+                            Send Invitations
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                           <DialogTitle>Send Invitations</DialogTitle>
@@ -460,6 +478,13 @@ export default function BulkInvitationsPage() {
                     </Dialog>
                   </div>
                 </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-slate-gray">
+                      Select guests from the list below to send invitations or reminders.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

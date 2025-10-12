@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { ChartNoAxesGantt, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet'
 import Link from 'next/link';
 import Image from 'next/image';
@@ -49,7 +49,7 @@ export default function Header() {
           <Link href="/signin">
             <Button
               variant="ghost"
-              className="text-[#1D3557] hover:bg-[#1D3557] hover:text-white focus:bg-royal-navy focus:text-white px-6 py-2 rounded-lg transition transform duration-200"
+              className="text-[#1D3557] hover:text-[#1D3557]/80 px-6 py-2 font-medium transition duration-200 flex items-center justify-center"
             >
               Log in
             </Button>
@@ -65,44 +65,44 @@ export default function Header() {
         <div className="md:hidden">
           {/* hamburger on the right */}
           <Button variant="ghost" size="icon" onClick={() => setIsOffcanvasOpen(true)}>
-            <Menu className="h-6 w-6" />
+            <ChartNoAxesGantt className="h-8 w-8" />
           </Button>
         </div>
       </nav>
       <Sheet open={isOffcanvasOpen} onOpenChange={setIsOffcanvasOpen}>
-        <SheetContent side="left">
-          <div className="p-2">
+        <SheetContent side="left" className="w-80 bg-white">
+          <div className="p-4 border-b border-gray-100">
             <Link href="/" className="flex items-center" onClick={() => setIsOffcanvasOpen(false)}>
               <Image
                 src="/images/wedvite-logo.png"
                 alt="WedVite Logo"
                 width={50}
                 height={50}
-                className="h-15 w-15"
+                className="h-12 w-12"
                 priority
               />
             </Link>
           </div>
-          <nav className="flex flex-col p-4 space-y-4">
+          <nav className="flex flex-col p-4 space-y-4 mt-6">
             <Link href="/signin" onClick={() => setIsOffcanvasOpen(false)}>
               <Button
                 variant="ghost"
-                className="w-full text-royal-navy hover:bg-royal-navy hover:text-white focus:bg-royal-navy focus:text-white px-6 py-2 rounded-lg transition transform duration-200"
+                className="w-full text-[#1D3557] hover:text-[#1D3557]/80 px-6 py-3 font-medium transition duration-200 flex items-center justify-center"
               >
                 Log in
               </Button>
             </Link>
             <Link href="/signup" onClick={() => setIsOffcanvasOpen(false)}>
               <Button
-                className="w-full bg-[#1D3557] text-[#FFFFFF] px-6 py-2 rounded-lg shadow-md hover:bg-[bg-royal-navy] hover:brightness-90 hover:scale-105 transition transform duration-200"
+                className="w-full bg-[#1D3557] text-[#FFFFFF] px-6 py-3 rounded-lg shadow-md hover:bg-opacity-90 hover:scale-105 transition transform duration-200 font-medium"
               >
                 Start Planning
               </Button>
             </Link>
           </nav>
           <SheetClose asChild>
-            <Button variant="ghost" className="absolute right-4 top-4 md:hidden">
-              <X className="sr-only" />
+            <Button variant="ghost" className="absolute right-4 top-4 h-8 w-8 p-0 hover:bg-gray-100">
+              <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </Button>
           </SheetClose>

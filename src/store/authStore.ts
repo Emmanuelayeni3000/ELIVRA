@@ -36,14 +36,28 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (result?.error) {
         console.error('Sign-in error:', result.error);
-        return { success: false, error: result.error };
+        
+        // Map common NextAuth errors to user-friendly messages
+        let userFriendlyError = result.error;
+        
+        if (result.error === 'CredentialsSignin') {
+          userFriendlyError = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (result.error.includes('No account found')) {
+          userFriendlyError = 'No account found with this email address. Please sign up first.';
+        } else if (result.error.includes('Invalid password')) {
+          userFriendlyError = 'Incorrect password. Please try again.';
+        } else if (result.error.includes('Email and password are required')) {
+          userFriendlyError = 'Please enter both email and password.';
+        }
+        
+        return { success: false, error: userFriendlyError };
       }
 
       // If sign-in is successful, you might want to refetch the session or update user state
       // For now, we'll rely on components using useSession to get the updated state
       return { success: true, error: null };
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during sign-in. Please try again.';
       console.error('Sign-in exception:', errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -67,7 +81,21 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (!response.ok) {
         console.error('Sign-up error:', data.error);
-        return { success: false, error: data.error || 'Sign-up failed' };
+        
+        // Map common sign-up errors to user-friendly messages
+        let userFriendlyError = data.error || 'Sign-up failed';
+        
+        if (data.error === 'User with this email already exists') {
+          userFriendlyError = 'An account with this email already exists. Please sign in instead.';
+        } else if (data.error === 'Missing required fields') {
+          userFriendlyError = 'Please fill in all required fields.';
+        } else if (data.error.includes('email')) {
+          userFriendlyError = 'Please enter a valid email address.';
+        } else if (data.error.includes('password')) {
+          userFriendlyError = 'Password must be at least 6 characters long.';
+        }
+        
+        return { success: false, error: userFriendlyError };
       }
 
       // Optionally sign in the user after successful signup
@@ -79,12 +107,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (signInResult?.error) {
         console.error('Auto sign-in after signup failed:', signInResult.error);
-        return { success: false, error: signInResult.error };
+        return { success: false, error: 'Account created successfully, but automatic sign-in failed. Please sign in manually.' };
       }
 
       return { success: true, error: null };
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = error instanceof Error ? error.message : 'Network error. Please check your connection and try again.';
       console.error('Sign-up exception:', errorMessage);
       return { success: false, error: errorMessage };
     } finally {

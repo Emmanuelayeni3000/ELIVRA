@@ -75,21 +75,35 @@ export async function POST(request: NextRequest) {
           reminderMessage = customMessage;
         }
 
-        // Generate invite link if guest has QR code
-        let inviteLink = '';
-        if (invite.qrCode) {
-          inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invite.qrCode}`;
+        if (!invite.email) {
+          results.push({
+            inviteId: invite.id,
+            guestName: invite.guestName,
+            email: invite.email,
+            status: 'failed',
+            reminderType,
+            error: 'Guest has no email address on file',
+          });
+          continue;
         }
 
         // Send reminder email
         await sendEventEmail({
-          to: invite.email,
-          guestName: invite.guestName,
-          event: invite.event,
-          inviteLink,
-          customMessage: reminderMessage,
-          subject: emailSubject,
           type: 'reminder',
+          to: invite.email,
+          subject: emailSubject,
+          baseUrl: process.env.NEXT_PUBLIC_APP_URL as string,
+          data: {
+            guestName: invite.guestName,
+            eventTitle: invite.event.title,
+            eventDate: new Date(invite.event.date).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
+            eventLocation: invite.event.location,
+          },
         });
 
         // Create reminder record
@@ -156,7 +170,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    const whereClause: { eventId?: string } = {};
+  const whereClause: { eventId?: string | { in: string[] } } = {};
 
     if (eventId) {
       // Verify event ownership

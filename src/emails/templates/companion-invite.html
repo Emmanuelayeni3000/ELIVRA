@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You&#39;re Joining the Celebration!</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f5f0e6;
+        font-family: 'Inter', Arial, sans-serif;
+        color: #1d3557;
+      }
+
+      .container {
+        max-width: 640px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 16px 32px rgba(29, 53, 87, 0.08);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #1d3557, #2a4a6b);
+        color: #ffffff;
+        text-align: center;
+        padding: 48px 32px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-family: 'Playfair Display', serif;
+        font-size: 36px;
+        letter-spacing: -0.5px;
+      }
+
+      .header p {
+        margin: 12px 0 0;
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .body {
+        padding: 40px 32px 48px;
+      }
+
+      .intro {
+        font-size: 16px;
+        line-height: 1.65;
+        margin-bottom: 28px;
+      }
+
+      .event-card {
+        background: linear-gradient(135deg, #fdfaf4, #faf3e8);
+        border: 1px solid rgba(201, 163, 104, 0.24);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 32px;
+      }
+
+      .event-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        margin: 0 0 18px;
+      }
+
+      .detail {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      .detail span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        margin-right: 12px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #c9a368, #d4b377);
+        color: #ffffff;
+        font-size: 16px;
+      }
+
+      .detail strong {
+        display: block;
+        font-weight: 600;
+      }
+
+      .cta {
+        background: #1d3557;
+        color: #ffffff;
+        border-radius: 14px;
+        padding: 24px 28px;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+
+      .cta p {
+        margin: 0;
+      }
+
+      .personal-message {
+        background: rgba(201, 163, 104, 0.1);
+        border: 1px solid rgba(201, 163, 104, 0.25);
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+        font-style: italic;
+        color: #2c2c2c;
+      }
+
+      .personal-message:empty {
+        display: none;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 13px;
+        color: rgba(29, 53, 87, 0.7);
+        padding-top: 16px;
+      }
+
+      @media (max-width: 600px) {
+        .header {
+          padding: 40px 20px;
+        }
+
+        .body {
+          padding: 32px 20px 40px;
+        }
+
+        .event-card {
+          padding: 24px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>You&#39;re Invited!</h1>
+        <p>You&#39;ve been added as a special guest by [Primary Guest Name]</p>
+      </div>
+
+      <div class="body">
+        <div class="intro">
+          <p>
+            We&#39;re delighted to let you know that [Primary Guest Name] has included you as their guest for
+            <strong>[Event Title]</strong>. We&#39;d love for you to be part of the celebration!
+          </p>
+          <p>
+            Below are the key details so you can mark your calendar and get ready for a beautiful experience.
+          </p>
+        </div>
+
+        <div class="event-card">
+          <h2 class="event-title">Event Details</h2>
+          <div class="detail">
+            <span>📅</span>
+            <div>
+              <strong>Date</strong>
+              <div>[Event Date]</div>
+            </div>
+          </div>
+          <div class="detail">
+            <span>📍</span>
+            <div>
+              <strong>Location</strong>
+              <div>[Event Location]</div>
+            </div>
+          </div>
+          <div class="detail">
+            <span>⏰</span>
+            <div>
+              <strong>Time</strong>
+              <div>[Event Time]</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="personal-message">[Personal Message]</div>
+
+        <div class="cta">
+          <p>
+            Please coordinate with [Primary Guest Name] if you have any questions or special requests.
+            If you need additional information before the big day, feel free to reply to this email.
+          </p>
+          <p style="margin-top: 16px;">
+            We&#39;re thrilled to have you joining us and can&#39;t wait to celebrate together!
+          </p>
+        </div>
+
+        <div class="footer">
+          Sent with love via WedVite — making every celebration unforgettable.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

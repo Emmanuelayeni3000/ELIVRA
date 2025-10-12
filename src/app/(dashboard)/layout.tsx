@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, ChartNoAxesGantt } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -104,12 +104,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button
             type="button"
             aria-label="Open navigation menu"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-royal-navy/5 text-royal-navy border border-royal-navy/20 hover:bg-royal-navy/10 focus:outline-none focus:ring-2 focus:ring-royal-navy/40 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-royal-navy/5 text-royal-navy hover:bg-royal-navy/10 focus:outline-none focus:ring-2 focus:ring-royal-navy/40 transition-colors"
             onClick={() => setMobileOpen(true)}
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <ChartNoAxesGantt className="w-5 h-5" />
           </button>
         </div>
       </header>
@@ -136,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <nav className="flex-1 px-4 py-6 overflow-y-auto">
             {renderNav(() => setMobileOpen(false))}
           </nav>
-          <div className="p-4 border-t border-white/10 mt-auto">
+          <div className="p-4 border-t border-white/10">
             <div>
               {/* replicate account dropdown area for mobile */}
               <div className="w-full">
@@ -147,14 +145,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <p className="text-[10px] text-royal-navy/60 line-clamp-1">{session?.user?.email}</p>
                   </div>
                 </button>
-                <div className="mt-3">
-                  <button onClick={async () => { await signOut(); router.push('/signin'); }} className="w-full text-left text-sm text-royal-navy hover:text-red-600 flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    Log out
-                  </button>
-                </div>
               </div>
             </div>
+          </div>
+          {/* Logout button at the very bottom */}
+          <div className="p-4 border-t border-white/10 mt-auto">
+            <button onClick={async () => { await signOut(); router.push('/signin'); }} className="w-full text-sm text-royal-navy hover:text-red-600 flex items-center justify-center gap-2 py-2">
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
           </div>
           <SheetClose asChild>
             <button className="sr-only">Close</button>

@@ -171,6 +171,15 @@
       vertical-align: middle;
       font-size: 20px;
       box-shadow: 0 4px 12px rgba(201, 163, 104, 0.2);
+      line-height: 1;
+      position: relative;
+    }
+
+    .detail-icon::before {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
     }
     
     .detail-text {
@@ -339,7 +348,13 @@
       </div>
       
       <div class="content">
-        <p class="greeting">Dear <span class="guest-name">[Guest Name]</span>,</p>
+        <div style="text-align: center; margin-bottom: 30px;">
+          <div style="background: linear-gradient(135deg, #C9A368 0%, #D4B377 100%); padding: 20px; border-radius: 15px; display: inline-block; margin-bottom: 20px;">
+            <h2 style="color: white; font-size: 24px; margin: 0; font-family: 'Playfair Display', serif;">
+              Dear [Guest Name]
+            </h2>
+          </div>
+        </div>
         
         <p class="invitation-text">
           We joyfully invite you to celebrate with us at our special event. 
@@ -370,6 +385,15 @@
             </div>
           </div>
           
+          {{#if Event Dress Code}}
+          <div class="detail-item">
+            <div class="detail-icon">🎨</div>
+            <div class="detail-text">
+              <strong>Dress Code Colour: {{Event Dress Code}}</strong>
+            </div>
+          </div>
+          {{/if}}
+          
           <div class="event-description">
             <p>[Event Description]</p>
           </div>
@@ -383,6 +407,21 @@
           <a href="[RSVP Link]" class="cta-button">
             View Invitation & RSVP
           </a>
+          
+          <div style="margin-top: 40px; text-align: center; background: linear-gradient(135deg, #F5F0E6 0%, #FAF5F0 100%); padding: 25px; border-radius: 15px; border: 2px solid #C9A368;">
+            <h3 style="color: #1D3557; font-size: 18px; margin: 0 0 15px 0; font-family: 'Playfair Display', serif;">
+              ✨ Quick Access ✨
+            </h3>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+              Scan this QR code with your phone for instant access to your invitation:
+            </p>
+            <div style="display: inline-block; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 8px 20px rgba(201, 163, 104, 0.3); border: 3px solid #C9A368;">
+              <img src="[QR Code]" alt="Personal QR Code for [Guest Name]'s invitation" style="width: 140px; height: 140px; border-radius: 10px; display: block;" />
+            </div>
+            <p style="color: #C9A368; font-size: 12px; margin-top: 15px; font-weight: 600;">
+              Personal invitation for [Guest Name]
+            </p>
+          </div>
         </div>
         
         <div class="divider"></div>

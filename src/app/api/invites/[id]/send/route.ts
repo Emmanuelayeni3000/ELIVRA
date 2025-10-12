@@ -34,10 +34,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Guest email not provided for this invitation' }, { status: 400 });
     }
 
-    // Generate QR code data URL
-    // The QR code will contain a link to the invitation viewing page
-    const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invite.id}`;
-    const qrCodeDataURL = await generateQRCodeDataURL(inviteLink);
+  // Build links: button should go to RSVP, QR should use smart invitation router
+  const rsvpLink = `${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${invite.qrCode}`;
+  const smartLink = `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${invite.qrCode}`;
+  const qrCodeDataURL = await generateQRCodeDataURL(smartLink);
 
     // Compose email HTML
     const emailHtml = `
@@ -46,8 +46,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       <p>Date: ${new Date(invite.event.date).toLocaleDateString()}</p>
       <p>Location: ${invite.event.location}</p>
       <p>Please RSVP by [RSVP Date - TODO]</p>
-      <img src="${qrCodeDataURL}" alt="QR Code for your invitation" />
-      <p>Or click here: <a href="${inviteLink}">${inviteLink}</a></p>
+  <img src="${qrCodeDataURL}" alt="QR Code for your invitation" />
+  <p>Respond here: <a href="${rsvpLink}">${rsvpLink}</a></p>
       <p>We look forward to celebrating with you!</p>
       <p>Best regards,</p>
       <p>The WedVite Team</p>

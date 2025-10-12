@@ -22,13 +22,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Plus, FileUp, Trash2, Edit, Mail } from 'lucide-react';
-import { Loading } from '@/components/loading';
+
 
 interface Guest {
   id: string;
   guestName: string;
   email?: string;
-  phone?: string;
   rsvpStatus: 'PENDING' | 'CONFIRMED' | 'DECLINED';
   eventId: string;
   event: {
@@ -51,8 +50,7 @@ export default function GuestsPage() {
       setFilteredGuests(
         guests.filter((guest) =>
           guest.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          guest.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          guest.phone?.includes(searchTerm)
+          guest.email?.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     } else {
@@ -205,7 +203,6 @@ export default function GuestsPage() {
                 <TableRow className="bg-pearl-beige/40">
                   <TableHead className="font-semibold text-royal-navy">Name</TableHead>
                   <TableHead className="font-semibold text-royal-navy">Email</TableHead>
-                  <TableHead className="font-semibold text-royal-navy">Phone</TableHead>
                   <TableHead className="font-semibold text-royal-navy">Event</TableHead>
                   <TableHead className="font-semibold text-royal-navy">RSVP Status</TableHead>
                   <TableHead className="font-semibold text-royal-navy">Actions</TableHead>
@@ -214,14 +211,13 @@ export default function GuestsPage() {
               <TableBody>
                 {filteredGuests.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6 text-slate-gray">No guests found</TableCell>
+                    <TableCell colSpan={5} className="text-center py-6 text-slate-gray">No guests found</TableCell>
                   </TableRow>
                 ) : (
                   filteredGuests.map((guest) => (
                     <TableRow key={guest.id} className="transition-colors hover:bg-pearl-beige/50">
                       <TableCell className="font-medium text-royal-navy">{guest.guestName}</TableCell>
                       <TableCell className="text-slate-gray">{guest.email || '-'}</TableCell>
-                      <TableCell className="text-slate-gray">{guest.phone || '-'}</TableCell>
                       <TableCell className="text-slate-gray">{guest.event.title}</TableCell>
                       <TableCell>{getRsvpStatusBadge(guest.rsvpStatus)}</TableCell>
                       <TableCell>

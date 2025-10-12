@@ -49,7 +49,10 @@ export async function POST(request: NextRequest) {
           results.push({ id: invite.id, email: '(missing)', status: 'failed', error: 'Invite has no email' });
           continue;
         }
-        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${invite.id}`;
+        const token = invite.qrCode?.includes('/')
+          ? invite.qrCode.split('/').filter(Boolean).pop() || invite.id
+          : invite.qrCode ?? invite.id;
+        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/rsvp/${token}`;
         await sendEventEmail({
           type: 'invitation',
           to: invite.email, // non-null after guard
