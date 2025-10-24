@@ -32,6 +32,7 @@ interface SendEventEmailProps {
     eventTime?: string; // Added for invitation email
     rsvpDate?: string; // Added for invitation email
     primaryGuestName?: string; // Added for companion guest emails
+    companionInviteLink?: string; // Added for companion guest invite button
   };
 }
 
@@ -74,7 +75,7 @@ export async function sendEventEmail({ type, to, subject, baseUrl, data }: SendE
         
         console.log('🔍 Template contains QR Code:', invitationHtml.includes('[QR Code]') ? 'Not replaced' : 'Replaced');
         await resend.emails.send({
-          from: `WedVite <${process.env.RESEND_FROM_EMAIL}>`,
+          from: `Elivra <${process.env.RESEND_FROM_EMAIL}>`,
           to: [to],
           subject,
           html: invitationHtml,
@@ -91,7 +92,7 @@ export async function sendEventEmail({ type, to, subject, baseUrl, data }: SendE
           'Response': data.response,
         }, baseUrl); // Pass baseUrl here
         await resend.emails.send({
-          from: `WedVite <${process.env.RESEND_FROM_EMAIL}>`,
+          from: `Elivra <${process.env.RESEND_FROM_EMAIL}>`,
           to: [to],
           subject,
           html: rsvpConfirmationHtml,
@@ -107,7 +108,7 @@ export async function sendEventEmail({ type, to, subject, baseUrl, data }: SendE
           'Event Location': data.eventLocation,
         }, baseUrl); // Pass baseUrl here
         await resend.emails.send({
-          from: `WedVite <${process.env.RESEND_FROM_EMAIL}>`,
+          from: `Elivra <${process.env.RESEND_FROM_EMAIL}>`,
           to: [to],
           subject,
           html: reminderHtml,
@@ -124,7 +125,7 @@ export async function sendEventEmail({ type, to, subject, baseUrl, data }: SendE
           'Message': data.message || 'N/A',
         }, baseUrl); // Pass baseUrl here
         await resend.emails.send({
-          from: `WedVite <${process.env.RESEND_FROM_EMAIL}>`,
+          from: `Elivra <${process.env.RESEND_FROM_EMAIL}>`,
           to: [to],
           subject,
           html: rsvpNotificationHtml,
@@ -132,8 +133,8 @@ export async function sendEventEmail({ type, to, subject, baseUrl, data }: SendE
         break;
 
       case 'companion-invite':
-        if (!data.primaryGuestName || !data.eventDate || !data.eventLocation) {
-          throw new Error('Primary guest name, event date, and event location are required for companion invite emails');
+        if (!data.primaryGuestName || !data.eventDate || !data.eventLocation || !data.companionInviteLink) {
+          throw new Error('Primary guest name, event date, event location, and invite link are required for companion invite emails');
         }
 
         const companionTemplateData: Record<string, string> = {
@@ -143,11 +144,12 @@ export async function sendEventEmail({ type, to, subject, baseUrl, data }: SendE
           'Event Location': data.eventLocation,
           'Event Time': data.eventTime ?? 'To be announced',
           'Personal Message': data.message ?? '',
+          'Companion Invite Link': data.companionInviteLink,
         };
 
         const companionHtml = getEmailTemplate('companion-invite', companionTemplateData, baseUrl);
         await resend.emails.send({
-          from: `WedVite <${process.env.RESEND_FROM_EMAIL}>`,
+          from: `Elivra <${process.env.RESEND_FROM_EMAIL}>`,
           to: [to],
           subject,
           html: companionHtml,

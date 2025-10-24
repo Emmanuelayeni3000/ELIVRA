@@ -9,6 +9,7 @@ const updateGuestSchema = z.object({
   guestName: z.string().min(1, 'Guest name is required').optional(),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   rsvpStatus: z.enum(['PENDING', 'CONFIRMED', 'DECLINED']).optional(),
+  guestLimit: z.number().int().min(1, 'Guest limit must be at least 1').nullable().optional(),
 });
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -68,6 +69,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         ...(validatedData.guestName !== undefined && { guestName: validatedData.guestName }),
         ...(validatedData.email !== undefined && { email: validatedData.email === '' ? null : validatedData.email }),
         ...(validatedData.rsvpStatus !== undefined && { rsvpStatus: validatedData.rsvpStatus }),
+        ...(validatedData.guestLimit !== undefined && { guestLimit: validatedData.guestLimit }),
       },
       include: {
         event: {
@@ -110,6 +112,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         ...(validatedData.guestName !== undefined && { guestName: validatedData.guestName }),
         ...(validatedData.email !== undefined && { email: validatedData.email === '' ? null : validatedData.email }),
         ...(validatedData.rsvpStatus !== undefined && { rsvpStatus: validatedData.rsvpStatus }),
+        ...(validatedData.guestLimit !== undefined && { guestLimit: validatedData.guestLimit }),
       },
     });
 

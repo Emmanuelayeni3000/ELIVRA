@@ -64,12 +64,12 @@ export default function SignUpPage() {
       );
 
       if (signUpSuccess) {
-        router.push('/dashboard');
+        router.push(`/verify-email?email=${encodeURIComponent(values.email.trim().toLowerCase())}`);
+        return;
       } else {
         // Check if it's an auto sign-in failure after successful account creation
         if (authError && authError.includes('Account created successfully')) {
           setSuccess('Account created successfully! Please sign in with your new credentials.');
-          // Optionally redirect to sign-in page after a delay
           setTimeout(() => {
             router.push('/signin');
           }, 3000);
@@ -89,8 +89,8 @@ export default function SignUpPage() {
         <CardHeader className="text-center">
           <Link href="/" className="flex justify-center mb-4">
             <Image
-              src="/images/wedvite-logo.png"
-              alt="WedVite Logo"
+              src="/Elivra-logo.png"
+              alt="Elivra Logo"
               width={60}
               height={60}
               className="hover:opacity-80 transition-opacity duration-200"

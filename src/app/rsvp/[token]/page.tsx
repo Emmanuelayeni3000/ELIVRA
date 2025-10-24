@@ -24,7 +24,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 const rsvpSchema = z.object({
   response: z.enum(['attending', 'not-attending']),
-  guestCount: z.number().min(1).optional(),
+  bringingGuests: z.enum(['yes', 'no']).optional(),
+  guestCount: z.number().min(0).optional(),
   guestEmails: z.array(z.string().email()).optional(),
   message: z.string().optional(),
 });
@@ -47,6 +48,8 @@ interface Guest {
   rsvpStatus?: 'attending' | 'not-attending';
   invitationToken: string;
   guestLimit?: number;
+  guestCount?: number;
+  companionEmails?: string[];
 }
 
 export default function RSVPPage() {
@@ -71,14 +74,24 @@ export default function RSVPPage() {
   } = useForm<RSVPFormValues>({
     resolver: zodResolver(rsvpSchema),
     defaultValues: {
-      guestCount: 1,
+      bringingGuests: 'no',
+      guestCount: 0,
       guestEmails: [],
       message: '',
     },
   });
 
   const responseValue = watch('response');
-  const guestCountValue = watch('guestCount') ?? 1;
+  const bringingGuestsValue = watch('bringingGuests');
+  const guestCountValue = watch('guestCount') ?? 0;
+  const allowedGuestLimit = Math.max(0, guest?.guestLimit ?? event?.guestLimit ?? 0);
+  const guestCountOptions = Array.from({ length: allowedGuestLimit }, (_, index) => index + 1);
+  const canBringGuests = allowedGuestLimit > 0;
+  const showGuestPreferences = responseValue === 'attending';
+  const showGuestCountSelect =
+    showGuestPreferences && bringingGuestsValue === 'yes' && canBringGuests;
+  const companionEmailCount = showGuestCountSelect ? guestCountValue : 0;
+  const showCompanionEmailInput = companionEmailCount > 0;
 
   useEffect(() => {
     if (!token) {
@@ -101,8 +114,28 @@ export default function RSVPPage() {
         setEvent(data.event);
         setGuest(data.guest);
 
-        reset();
-        setGuestEmailsInput('');
+        const companionEmails = Array.isArray(data.guest.companionEmails)
+          ? data.guest.companionEmails
+          : [];
+        const clampedGuestLimit = Math.max(0, data.guest.guestLimit ?? data.event.guestLimit ?? 0);
+        const storedGuestCount = Math.max(0, data.guest.guestCount ?? 0);
+        const adjustedGuestCount = Math.min(storedGuestCount, clampedGuestLimit);
+        const bringingGuestsDefault: RSVPFormValues['bringingGuests'] =
+          adjustedGuestCount > 0 ? 'yes' : 'no';
+
+        reset({
+          bringingGuests: bringingGuestsDefault,
+          guestCount: adjustedGuestCount,
+          guestEmails: bringingGuestsDefault === 'yes' ? companionEmails : [],
+          message: '',
+        } as Partial<RSVPFormValues>);
+
+        setValue('bringingGuests', bringingGuestsDefault);
+        setValue('guestCount', adjustedGuestCount);
+        setValue('guestEmails', bringingGuestsDefault === 'yes' ? companionEmails : []);
+        setGuestEmailsInput(
+          bringingGuestsDefault === 'yes' ? companionEmails.join(', ') : ''
+        );
         clearErrors();
 
         if (data.guest.rsvpStatus === 'attending' || data.guest.rsvpStatus === 'not-attending') {
@@ -122,33 +155,108 @@ export default function RSVPPage() {
   useEffect(() => {
     if (responseValue !== 'attending') {
       setGuestEmailsInput('');
+      setValue('bringingGuests', 'no');
+      setValue('guestCount', 0);
       setValue('guestEmails', []);
-      clearErrors('guestEmails');
+      clearErrors(['guestEmails', 'guestCount', 'bringingGuests']);
     }
   }, [responseValue, setValue, clearErrors]);
 
+  useEffect(() => {
+    if (bringingGuestsValue !== 'yes') {
+      if (guestCountValue !== 0) {
+        setValue('guestCount', 0);
+      }
+      return;
+    }
+
+    if (guestCountValue > allowedGuestLimit) {
+      const nextCount = Math.max(0, allowedGuestLimit);
+      setValue('guestCount', nextCount);
+      setGuestEmailsInput('');
+      setValue('guestEmails', []);
+      clearErrors('guestEmails');
+    }
+  }, [bringingGuestsValue, guestCountValue, allowedGuestLimit, setValue, clearErrors]);
+
+  useEffect(() => {
+    if (!canBringGuests && bringingGuestsValue === 'yes') {
+      setValue('bringingGuests', 'no');
+      setValue('guestCount', 0);
+      setGuestEmailsInput('');
+      setValue('guestEmails', []);
+      clearErrors(['guestEmails', 'guestCount', 'bringingGuests']);
+    }
+  }, [canBringGuests, bringingGuestsValue, setValue, clearErrors]);
+
   const onSubmit = async (values: RSVPFormValues) => {
     try {
-      if (values.response === 'attending') {
-        const count = values.guestCount ?? 1;
-        const expectedAdditionalGuests = Math.max(0, count - 1);
-        const providedGuests = values.guestEmails?.length ?? 0;
+      const bringingGuests = values.bringingGuests === 'yes';
+      const normalizedGuestCount = bringingGuests ? Math.max(0, values.guestCount ?? 0) : 0;
 
-        if (providedGuests !== expectedAdditionalGuests) {
-          setFormError('guestEmails', {
+      if (values.response === 'attending') {
+        if (bringingGuests && !canBringGuests) {
+          setFormError('bringingGuests', {
             type: 'manual',
-            message: `Please provide exactly ${expectedAdditionalGuests} email${expectedAdditionalGuests === 1 ? '' : 's'} for your additional guest${expectedAdditionalGuests === 1 ? '' : 's'}.`,
+            message: 'This invitation does not include additional guests.',
           });
           return;
         }
+
+        if (bringingGuests) {
+          if (normalizedGuestCount <= 0) {
+            setFormError('guestCount', {
+              type: 'manual',
+              message: 'Please select how many guests you will bring.',
+            });
+            return;
+          }
+
+          if (normalizedGuestCount > allowedGuestLimit) {
+            setFormError('guestCount', {
+              type: 'manual',
+              message: `You can bring up to ${allowedGuestLimit} guest${allowedGuestLimit === 1 ? '' : 's'}.`,
+            });
+            return;
+          }
+        }
+
+        const providedGuestEmails = bringingGuests ? values.guestEmails?.length ?? 0 : 0;
+
+        if (bringingGuests) {
+          if (providedGuestEmails !== normalizedGuestCount) {
+            setFormError('guestEmails', {
+              type: 'manual',
+              message: `Please provide exactly ${normalizedGuestCount} email${normalizedGuestCount === 1 ? '' : 's'} for your guest${normalizedGuestCount === 1 ? '' : 's'}.`,
+            });
+            return;
+          }
+        } else {
+          if ((values.guestEmails?.length ?? 0) > 0) {
+            setGuestEmailsInput('');
+            setValue('guestEmails', []);
+          }
+          clearErrors('guestEmails');
+        }
+
+        clearErrors(['guestCount', 'bringingGuests']);
       }
+
+      const payload = {
+        response: values.response,
+        bringingGuests: values.bringingGuests ?? 'no',
+        guestCount: values.response === 'attending' ? normalizedGuestCount : 0,
+        guestEmails:
+          values.response === 'attending' && bringingGuests ? values.guestEmails ?? [] : [],
+        message: values.message ?? '',
+      };
 
       const response = await fetch(`/api/rsvp/${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -258,104 +366,134 @@ export default function RSVPPage() {
               )}
             </div>
 
-            {responseValue === 'attending' && (
+            {showGuestPreferences && (
               <>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    Number of Guests (including yourself)
+                    Will you be bringing guests?
                   </Label>
-                  {(() => {
-                    const limit = event?.guestLimit ?? guest?.guestLimit ?? 1;
-                    const maxGuests = Math.max(1, limit);
-                    const guestCountOptions = Array.from({ length: maxGuests }, (_, index) => index + 1);
+                  <Select
+                    value={bringingGuestsValue ?? ''}
+                    onValueChange={(value) => {
+                      const selection = value as RSVPFormValues['bringingGuests'];
+                      setValue('bringingGuests', selection);
 
-                    return (
-                      <Select
-                        value={guestCountValue?.toString() ?? ''}
-                        onValueChange={(value) => {
-                          const count = Number.parseInt(value, 10);
-                          setValue('guestCount', count);
-                          setGuestEmailsInput('');
-                          setValue('guestEmails', []);
-                          clearErrors('guestEmails');
-                        }}
-                      >
-                        <SelectTrigger className="wedding-input">
-                          <SelectValue placeholder="Select guest count" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {guestCountOptions.map((num) => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? 'Guest' : 'Guests'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    );
-                  })()}
-                  {event?.guestLimit && (
-                    <p className="text-xs text-slate-gray">
-                      You can invite up to {event.guestLimit} guests (including yourself)
-                    </p>
+                      if (selection === 'yes') {
+                        const nextCount = guestCountOptions.length > 0
+                          ? Math.min(Math.max(guestCountValue || 1, 1), allowedGuestLimit)
+                          : 0;
+                        setValue('guestCount', nextCount);
+                        clearErrors(['bringingGuests', 'guestCount']);
+                      } else {
+                        setValue('guestCount', 0);
+                        setGuestEmailsInput('');
+                        setValue('guestEmails', []);
+                        clearErrors(['bringingGuests', 'guestCount', 'guestEmails']);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="wedding-input">
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="no">No, I will attend alone</SelectItem>
+                      <SelectItem value="yes" disabled={!canBringGuests}>
+                        Yes, I will bring guests
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.bringingGuests && (
+                    <p className="text-sm text-destructive">{errors.bringingGuests.message}</p>
                   )}
+                  <p className="text-xs text-slate-gray">
+                    {canBringGuests
+                      ? `You can bring up to ${allowedGuestLimit} guest${allowedGuestLimit === 1 ? '' : 's'}.`
+                      : 'This invitation does not include additional guests.'}
+                  </p>
                 </div>
 
-                {(() => {
-                  if (!guestCountValue || guestCountValue <= 1) {
-                    return null;
-                  }
+                {showGuestCountSelect && (
+                  <div className="space-y-2">
+                    <Label>How many guests will you bring?</Label>
+                    <Select
+                      value={guestCountValue > 0 ? guestCountValue.toString() : ''}
+                      onValueChange={(value) => {
+                        const count = Number.parseInt(value, 10);
+                        setValue('guestCount', count);
+                        setGuestEmailsInput('');
+                        setValue('guestEmails', []);
+                        clearErrors(['guestCount', 'guestEmails']);
+                      }}
+                      disabled={guestCountOptions.length === 0}
+                    >
+                      <SelectTrigger className="wedding-input">
+                        <SelectValue placeholder="Select guest count" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {guestCountOptions.map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num} {num === 1 ? 'Guest' : 'Guests'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.guestCount && (
+                      <p className="text-sm text-destructive">{errors.guestCount.message}</p>
+                    )}
+                    <p className="text-xs text-slate-gray">
+                      Select up to {allowedGuestLimit} guest{allowedGuestLimit === 1 ? '' : 's'} to accompany you.
+                    </p>
+                  </div>
+                )}
 
-                  const additionalGuests = Math.max(0, guestCountValue - 1);
+                {showCompanionEmailInput && (
+                  <div className="space-y-3">
+                    <Label className="text-royal-navy font-inter">Guest Email Addresses</Label>
+                    <p className="text-sm text-slate-gray">
+                      Enter the email addresses for your {companionEmailCount} guest
+                      {companionEmailCount === 1 ? '' : 's'}, separated by commas.
+                    </p>
+                    <Input
+                      type="text"
+                      placeholder="guest1@example.com, guest2@example.com"
+                      value={guestEmailsInput}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setGuestEmailsInput(value);
 
-                  return (
-                    <div className="space-y-3">
-                      <Label className="text-royal-navy font-inter">Additional Guest Emails</Label>
-                      <p className="text-sm text-slate-gray">
-                        Enter the email addresses for your {additionalGuests} additional guest
-                        {additionalGuests === 1 ? '' : 's'}, separated by commas.
-                      </p>
-                      <Input
-                        type="text"
-                        placeholder="guest1@example.com, guest2@example.com"
-                        value={guestEmailsInput}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          setGuestEmailsInput(value);
+                        const emails = value
+                          .split(',')
+                          .map((email) => email.trim())
+                          .filter((email) => email.length > 0);
 
-                          const emails = value
-                            .split(',')
-                            .map((email) => email.trim())
-                            .filter((email) => email.length > 0);
+                        setValue('guestEmails', emails);
 
-                          setValue('guestEmails', emails);
+                        const invalidEmails = emails.filter(
+                          (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+                        );
 
-                          const invalidEmails = emails.filter(
-                            (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-                          );
-
-                          if (invalidEmails.length > 0) {
-                            setFormError('guestEmails', {
-                              type: 'manual',
-                              message: `Some email${invalidEmails.length === 1 ? '' : 's'} look invalid: ${invalidEmails.join(', ')}`,
-                            });
-                          } else if (emails.length !== additionalGuests) {
-                            setFormError('guestEmails', {
-                              type: 'manual',
-                              message: `Please provide exactly ${additionalGuests} email${additionalGuests === 1 ? '' : 's'}.`,
-                            });
-                          } else {
-                            clearErrors('guestEmails');
-                          }
-                        }}
-                        className="wedding-input"
-                      />
-                      {errors.guestEmails && (
-                        <p className="text-sm text-destructive">{errors.guestEmails.message}</p>
-                      )}
-                    </div>
-                  );
-                })()}
+                        if (invalidEmails.length > 0) {
+                          setFormError('guestEmails', {
+                            type: 'manual',
+                            message: `Some email${invalidEmails.length === 1 ? '' : 's'} look invalid: ${invalidEmails.join(', ')}`,
+                          });
+                        } else if (emails.length !== companionEmailCount) {
+                          setFormError('guestEmails', {
+                            type: 'manual',
+                            message: `Please provide exactly ${companionEmailCount} email${companionEmailCount === 1 ? '' : 's'}.`,
+                          });
+                        } else {
+                          clearErrors('guestEmails');
+                        }
+                      }}
+                      className="wedding-input"
+                    />
+                    {errors.guestEmails && (
+                      <p className="text-sm text-destructive">{errors.guestEmails.message}</p>
+                    )}
+                  </div>
+                )}
               </>
             )}
 

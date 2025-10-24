@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { sendEmail } from '@/lib/resend';
+import { getEmailTemplate } from '@/lib/email-templates';
 
 export async function POST(req: Request) {
   try {
@@ -48,13 +51,44 @@ export async function POST(req: Request) {
       },
     });
 
-    // Don't return the password hash
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...userWithoutPassword } = user;
+    // Remove any existing verification tokens for this user
+    await prisma.emailVerificationToken.deleteMany({
+      where: { userId: user.id },
+    });
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+
+    await prisma.emailVerificationToken.create({
+      data: {
+        token,
+        expiresAt,
+        userId: user.id,
+      },
+    });
+
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || 'http://localhost:3000';
+    const verificationUrl = `${baseUrl}/verify-email/${token}`;
+
+    const emailHtml = getEmailTemplate('verify-email', {
+      'User Name': user.name ?? 'there',
+      'Verification Link': verificationUrl,
+    }, baseUrl);
+
+    const emailSendResult = await sendEmail({
+      to: user.email,
+      subject: 'Verify your Elivra account',
+      html: emailHtml,
+    });
+
+    if (!emailSendResult.success) {
+      return NextResponse.json({
+        error: 'Account created, but we could not send the verification email. Please try requesting a new one shortly.',
+      }, { status: 500 });
+    }
 
     return NextResponse.json({ 
-      message: 'Account created successfully', 
-      user: userWithoutPassword 
+      message: 'Account created successfully. Please verify your email to continue.',
     }, { status: 201 });
     
   } catch (error: unknown) {

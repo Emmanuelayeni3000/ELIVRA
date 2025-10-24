@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // WedVite Brand Colors
+        // Elivra Brand Colors
         'pearl-beige': '#F5F0E6',
         'pure-white': '#FFFFFF',
         'royal-navy': '#1D3557',

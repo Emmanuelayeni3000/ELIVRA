@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { to, subject = 'WedVite Test Email' } = await request.json();
+    const { to, subject = 'Elivra Test Email' } = await request.json();
 
     if (!to) {
       return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>WedVite Test Email</title>
+        <title>Elivra Test Email</title>
         <style>
           body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1D3557; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -34,14 +34,14 @@ export async function POST(request: NextRequest) {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎉 WedVite Email Test</h1>
+            <h1>🎉 Elivra Email Test</h1>
           </div>
           <div class="content">
             <div class="success">
               <strong>✅ Success!</strong> Your email configuration is working correctly.
             </div>
             <p>Hello ${session.user?.name || 'there'}!</p>
-            <p>This is a test email to verify that your WedVite email configuration is working properly with Resend.</p>
+            <p>This is a test email to verify that your Elivra email configuration is working properly with Resend.</p>
             <p><strong>Configuration Details:</strong></p>
             <ul>
               <li>✅ Resend API Key: Configured</li>
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
               <li>✅ Send Function: Working</li>
             </ul>
             <p>You can now send invitations, reminders, and other event emails to your guests!</p>
-            <p>Best regards,<br>The WedVite Team</p>
+            <p>Best regards,<br>The Elivra Team</p>
           </div>
         </div>
       </body>

@@ -102,29 +102,51 @@ const DownloadInviteCard: React.FC<DownloadInviteCardProps> = ({
           clonedElement.style.boxShadow = '0 12px 40px rgba(29, 53, 87, 0.15)';
           clonedElement.style.borderRadius = '12px';
           clonedElement.style.border = '1px solid rgba(201, 163, 104, 0.25)';
-          
-          // Center all invitation information for download
+          clonedElement.style.display = 'flex';
+          clonedElement.style.flexDirection = 'column';
+          clonedElement.style.alignItems = 'center';
+          clonedElement.style.justifyContent = 'center';
           clonedElement.style.textAlign = 'center';
+
+          // Normalize any explicitly left-aligned text classes for export
+          clonedElement.querySelectorAll<HTMLElement>('.text-left').forEach((el) => {
+            el.classList.remove('text-left');
+            el.style.textAlign = 'center';
+          });
+          clonedElement.querySelectorAll<HTMLElement>('.items-start').forEach((el) => {
+            el.classList.remove('items-start');
+            el.style.alignItems = 'center';
+          });
           
           // Find and center the event details grid
           const eventDetailsGrid = clonedElement.querySelector('.grid');
           if (eventDetailsGrid) {
             (eventDetailsGrid as HTMLElement).style.textAlign = 'center';
             (eventDetailsGrid as HTMLElement).style.justifyItems = 'center';
+            (eventDetailsGrid as HTMLElement).style.alignItems = 'center';
             
             // Center individual detail items
             const detailItems = eventDetailsGrid.querySelectorAll('.flex');
             detailItems.forEach((item) => {
-              (item as HTMLElement).style.justifyContent = 'center';
-              (item as HTMLElement).style.textAlign = 'center';
+              const detail = item as HTMLElement;
+              detail.style.justifyContent = 'center';
+              detail.style.textAlign = 'center';
+              detail.style.flexDirection = 'column';
+              detail.style.alignItems = 'center';
               
               // Center the text within each detail item
               const textDiv = item.querySelector('div:last-child');
               if (textDiv) {
                 (textDiv as HTMLElement).style.textAlign = 'center';
+                (textDiv as HTMLElement).style.marginTop = '8px';
               }
             });
           }
+
+          // Ensure any buttons hidden for download remain excluded
+          clonedElement.querySelectorAll('button').forEach((button) => {
+            (button as HTMLElement).style.display = 'none';
+          });
         },
       });
 

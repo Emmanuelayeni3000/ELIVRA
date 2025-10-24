@@ -270,7 +270,7 @@ export default function AddGuestPage() {
                       <SelectContent>
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                           <SelectItem key={num} value={num.toString()} className="bg-white">
-                            {num} {num === 1 ? 'Guest' : 'Guests'} (including themselves)
+                            {num} {num === 1 ? 'Guest' : 'Guests'}
                           </SelectItem>
                         ))}
                       </SelectContent>

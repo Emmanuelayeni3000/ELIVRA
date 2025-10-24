@@ -46,6 +46,8 @@ export const useAuthStore = create<AuthState>((set) => ({
           userFriendlyError = 'No account found with this email address. Please sign up first.';
         } else if (result.error.includes('Invalid password')) {
           userFriendlyError = 'Incorrect password. Please try again.';
+        } else if (result.error.includes('verify your email address')) {
+          userFriendlyError = 'Please verify your email address before signing in.';
         } else if (result.error.includes('Email and password are required')) {
           userFriendlyError = 'Please enter both email and password.';
         }
@@ -77,7 +79,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         body: JSON.stringify({ email, password, name }),
       });
 
-      const data = await response.json();
+  const data = await response.json();
 
       if (!response.ok) {
         console.error('Sign-up error:', data.error);
@@ -96,18 +98,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
         
         return { success: false, error: userFriendlyError };
-      }
-
-      // Optionally sign in the user after successful signup
-      const signInResult = await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (signInResult?.error) {
-        console.error('Auto sign-in after signup failed:', signInResult.error);
-        return { success: false, error: 'Account created successfully, but automatic sign-in failed. Please sign in manually.' };
       }
 
       return { success: true, error: null };

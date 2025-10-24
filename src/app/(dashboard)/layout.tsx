@@ -82,19 +82,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Mobile/Tablet Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-royal-navy/10 shadow-sm">
         <div className="flex items-center justify-between px-4 py-1">
-          {/* Logo on the left */}
           <Link href="/dashboard" className="flex items-center">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/wedvite-logo.png"
-                alt="WedVite Logo"
+                src="/Elivra-logo.png"
+                alt="Elivra Logo"
                 width={50}
                 height={50}
                 className="h-15 w-15"
                 priority
               />
               {/* <div className="flex flex-col">
-                <span className="text-lg font-playfair-display font-bold text-royal-navy leading-tight">WedVite</span>
+                <span className="text-lg font-playfair-display font-bold text-royal-navy leading-tight">Elivra</span>
                 <span className="text-xs text-gold-foil/80 font-inter">Celebration Console</span>
               </div> */}
             </div>
@@ -118,15 +117,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard" className="flex items-center">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/wedvite-logo.png"
-                alt="WedVite Logo"
+                src="/Elivra-logo.png"
+                alt="Elivra Logo"
                 width={50}
                 height={50}
                 className="h-15 w-15"
                 priority
               />
               <div className="flex flex-col">
-                <span className="text-lg font-playfair-display font-bold text-royal-navy leading-tight">WedVite</span>
+                <span className="text-lg font-playfair-display font-bold text-royal-navy leading-tight">Elivra</span>
                 {/* <span className="text-xs text-gold-foil/80 font-inter">Celebration Console</span> */}
               </div>
             </div>
@@ -170,7 +169,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-6 pb-4 border-b border-white/10 flex items-center justify-between">
           {/* Branding only visible on mobile; hidden on desktop */}
           <div className="md:hidden">
-            <h2 className="text-2xl font-playfair-display font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gold-foil to-pearl-beige">WedVite</h2>
+            <h2 className="text-2xl font-playfair-display font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gold-foil to-pearl-beige">Elivra</h2>
             <p className="mt-1 text-xs text-gold-foil/80 font-inter">Celebration Console</p>
           </div>
 
@@ -202,6 +201,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="flex-1 px-4 py-6 overflow-y-auto">
           {renderNav(() => setMobileOpen(false))}
         </nav>
+        <div className="px-4 pb-6 border-t border-white/10 hidden md:block">
+          <Button
+            variant="outline"
+            className="w-full justify-center gap-2 border-royal-navy/30 text-royal-navy hover:bg-royal-navy hover:text-royal-navy"
+            onClick={async () => {
+              await signOut();
+              router.push('/signin');
+            }}
+          >
+            <LogOut className="h-4 w-4" />
+            Log out
+          </Button>
+        </div>
   {/* account area moved to the top of the sidebar for desktop; bottom area removed to avoid duplication */}
       </aside>
 

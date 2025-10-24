@@ -1,6 +1,6 @@
-# WedVite - Wedding Planning Console
+# Elivra - Elegant Event Invitations
 
-A comprehensive wedding planning application built with modern web technologies to help couples and wedding planners manage every aspect of their special day.
+A comprehensive event planning application built with modern web technologies to help couples and event planners manage every aspect of their special celebrations.
 
 ## 👨‍💻 Developer
 
@@ -8,12 +8,12 @@ A comprehensive wedding planning application built with modern web technologies 
 
 ## 📋 Overview
 
-WedVite is a powerful wedding management platform that streamlines the entire wedding planning process. From event creation and guest management to invitation handling and RSVP tracking, WedVite provides all the tools needed to create unforgettable weddings.
+Elivra is a powerful event management platform that streamlines the entire event planning process. From event creation and guest management to invitation handling and RSVP tracking, Elivra provides all the tools needed to create unforgettable celebrations.
 
 ## 🚀 Features
 
 ### Event Management
-- Create and manage multiple wedding events
+- Create and manage multiple elegant events
 - Event templates for quick setup
 - Detailed event information (date, time, location, description)
 - Event editing and customization
@@ -23,12 +23,15 @@ WedVite is a powerful wedding management platform that streamlines the entire we
 - Bulk guest import via CSV
 - Guest information tracking (name, email, phone, RSVP status)
 - Guest categorization and filtering
+- Companion guest email management
 
 ### Invitation System
 - Digital invitation management
 - Bulk invitation sending
 - RSVP tracking and responses
 - Invitation templates and customization
+- QR code generation for invitations
+- Companion guest invite system
 
 ### Dashboard & Analytics
 - Interactive dashboard with event overview
@@ -62,6 +65,8 @@ WedVite is a powerful wedding management platform that streamlines the entire we
 - **Zod** - Schema validation
 - **React Day Picker** - Date selection
 - **React Hot Toast** - Notifications
+- **Resend** - Email delivery service
+- **QR Code Generator** - QR code generation for invitations
 
 ## 📋 Prerequisites
 
@@ -76,8 +81,8 @@ Before running this project, make sure you have the following installed:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/wedvite.git
-   cd wedvite
+   git clone https://github.com/Emmanuelayeni3000/ELIVRA.git
+   cd ELIVRA/wedvite
    ```
 
 2. **Install dependencies:**
@@ -92,9 +97,11 @@ Before running this project, make sure you have the following installed:
 3. **Set up environment variables:**
    Create a `.env.local` file in the root directory and add:
    ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/wedvite"
+   DATABASE_URL="postgresql://username:password@localhost:5432/elivra"
    NEXTAUTH_URL="http://localhost:3000"
    NEXTAUTH_SECRET="your-secret-key"
+   RESEND_API_KEY="your-resend-api-key"
+   RESEND_FROM_EMAIL="noreply@yourdomain.com"
    ```
 
 4. **Set up the database:**
@@ -119,32 +126,36 @@ Before running this project, make sure you have the following installed:
 
 ### Getting Started
 1. Sign up for an account or sign in
-2. Create your first wedding event
+2. Create your first elegant event
 3. Add guests to your event
 4. Send invitations and track RSVPs
-5. Monitor your wedding planning progress
+5. Monitor your event planning progress
 
 ### Key Workflows
 - **Event Creation:** Use the dashboard to create new events with templates
 - **Guest Management:** Import guests via CSV or add them manually
 - **Invitation Handling:** Send bulk invitations and monitor responses
+- **Companion Guests:** Manage additional guests with email notifications
 - **Dashboard Monitoring:** Track event progress and guest statistics
 
 ## 📁 Project Structure
 
 ```
-wedvite/
-├── app/                    # Next.js App Router pages
-│   ├── (auth)/            # Authentication pages
-│   ├── (dashboard)/       # Dashboard pages
-│   └── api/               # API routes
-├── components/            # Reusable React components
-│   ├── ui/               # shadcn/ui components
-│   └── layout/           # Layout components
-├── lib/                  # Utility libraries
+elivra/
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── (auth)/            # Authentication pages
+│   │   ├── (dashboard)/       # Dashboard pages
+│   │   └── api/               # API routes
+│   ├── components/            # Reusable React components
+│   │   ├── ui/               # shadcn/ui components
+│   │   └── layout/           # Layout components
+│   ├── lib/                  # Utility libraries
+│   ├── emails/               # Email templates
+│   ├── store/                # Zustand state management
+│   └── types/                # TypeScript type definitions
 ├── prisma/               # Database schema and migrations
-├── store/                # Zustand state management
-└── types/                # TypeScript type definitions
+└── public/               # Static assets
 ```
 
 ## 🤝 Contributing
@@ -172,13 +183,29 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 **Emmanuel Ayeni**
-- Email: emmanuel.ayeni@example.com
+- Email: ayeniemmanuel914@gmail.com
 - LinkedIn: [Your LinkedIn Profile](https://linkedin.com/in/emmanuel-ayeni)
 - GitHub: [Your GitHub Profile](https://github.com/emmanuel-ayeni)
 
 ---
 
-Made with ❤️ by Emmanuel Ayeni for couples planning their perfect wedding day.This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Made with ❤️ by Emmanuel Ayeni for couples planning their perfect celebrations.
+
+## 🎯 About Elivra
+
+Elivra transforms the way you create and manage event invitations. From elegant weddings to exclusive galas, our platform helps you craft the perfect invite for life's most elegant moments.
+
+**Key Highlights:**
+- ✨ Elegant invitation templates
+- 📧 Automated email management
+- 📊 Real-time RSVP tracking
+- 👥 Companion guest handling
+- 📱 QR code integration
+- 🎨 Premium design system
+
+---
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 

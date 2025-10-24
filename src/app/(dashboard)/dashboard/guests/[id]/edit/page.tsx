@@ -28,6 +28,7 @@ const updateGuestSchema = z.object({
 	guestName: z.string().min(1, 'Guest name is required'),
 	email: z.string().email('Invalid email address').optional().or(z.literal('')),
 	rsvpStatus: z.enum(['PENDING', 'CONFIRMED', 'DECLINED']),
+	guestLimit: z.number().int().min(1, 'Guest limit must be at least 1').nullable().optional(),
 });
 
 type UpdateGuestFormValues = z.infer<typeof updateGuestSchema>;
@@ -44,6 +45,7 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 			guestName: '',
 			email: '',
 			rsvpStatus: 'PENDING',
+			guestLimit: null,
 		},
 	});
 
@@ -79,6 +81,10 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 	}, [fetchGuest, id]);
 
 	const onSubmit = async (values: UpdateGuestFormValues) => {
+		const payload: UpdateGuestFormValues = {
+			...values,
+			guestLimit: values.guestLimit ?? null,
+		};
 		const promise = new Promise(async (resolve, reject) => {
 			try {
 				const response = await fetch(`/api/guests/${id}`, {
@@ -86,7 +92,7 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify(values),
+					body: JSON.stringify(payload),
 				});
 
 				if (!response.ok) {
@@ -240,6 +246,32 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 									</FormItem>
 								)}
 							/>
+								<FormField
+									control={form.control}
+									name="guestLimit"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className="text-royal-navy font-inter">Guest Limit</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													min={1}
+													inputMode="numeric"
+													value={field.value ?? ''}
+													onChange={(event) => {
+														const value = event.target.value;
+														field.onChange(value === '' ? null : Number.parseInt(value, 10));
+													}}
+													className="input-elevated h-12"
+												/>
+											</FormControl>
+											<FormDescription className="text-slate-gray font-inter">
+												Leave blank to use the event-level limit.
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							<div className="flex justify-end space-x-4">
 								<Button
 									type="button"

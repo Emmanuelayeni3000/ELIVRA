@@ -31,14 +31,11 @@ export default function LandingPage() {
           <h1
             className="text-5xl md:text-7xl font-playfair-display font-bold mb-6 leading-tight tracking-tight text-[#1D3557]"
           >
-            Your <span className="text-gold-foil font-great-vibes">Dream</span> Wedding,{" "}
-            <br className="hidden md:block" />
-            Seamlessly Planned
+            Craft the perfect invite for life’s most <span className="text-gold-foil font-great-vibes">elegant moments</span>.
           </h1>
           
           <p className="text-lg md:text-xl mb-12 max-w-2xl mx-auto font-inter text-pure-white/90 leading-relaxed">
-            Create beautiful digital invitations, manage RSVPs, and connect with your guests 
-            through an elegant and effortless experience.
+            Elivra helps you design, personalize, and share stunning event invitations — from weddings to galas — with seamless QR code integration.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
@@ -46,7 +43,7 @@ export default function LandingPage() {
               <Button 
                 className="wedding-button-primary group relative overflow-hidden text-lg px-10 py-6 rounded-xl font-semibold tracking-wide shadow-xl"
               >
-                <span className="relative z-10">Begin Your Journey</span>
+                <span className="relative z-10">Create an Invite</span>
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
               </Button>
             </Link>
@@ -57,7 +54,7 @@ export default function LandingPage() {
                 className="wedding-button-secondary text-pure-white hover:text-royal-navy text-lg px-10 py-6 shadow-lg font-semibold tracking-wide transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
               >
                 <QrCode className="mr-2 h-5 w-5" aria-hidden="true" />
-                Scan QR Code
+                Scan Invite QR Code
               </Button>
             </Link>
           </div>
@@ -174,10 +171,10 @@ export default function LandingPage() {
             {/* Left: Heading & Primary CTA */}
             <div className="text-left max-w-2xl animate-featureIn" style={{ animationDelay: '0s' }}>
               <h2 className="text-4xl md:text-5xl font-playfair-display text-royal-navy mb-4 leading-tight">
-                Begin Your <span className="text-gold-foil font-great-vibes">Wedding Journey</span>
+                Craft the perfect <span className="text-gold-foil font-great-vibes">invite</span> for life&apos;s most elegant moments
               </h2>
               <p className="text-lg md:text-xl text-slate-gray font-inter leading-relaxed mb-8">
-                Join thousands of couples who have created unforgettable wedding experiences with WedVite — beautiful invitations, effortless RSVPs, and polished guest tools.
+                Join thousands of couples who have created unforgettable wedding experiences with Elivra — beautiful invitations, effortless RSVPs, and polished guest tools.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -243,8 +240,8 @@ export default function LandingPage() {
             <div className="space-y-4">
               <Link href="/" className="inline-block">
                 <Image
-                  src="/images/footerlogo.png"
-                  alt="WedVite Logo"
+                  src="/Elivra-footer.png"
+                  alt="Elivra Logo"
                   width={180}
                   height={48}
                   className="h-15 w-auto"
@@ -289,7 +286,7 @@ export default function LandingPage() {
           {/* Footer Bottom */}
           <div className="border-t border-[#ffffff] mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-pure-white/60 font-inter">
-              &copy; {new Date().getFullYear()} WedVite. All rights reserved.
+              &copy; {new Date().getFullYear()} Elivra. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0 items-center">
               <a href="#" className="text-pure-white/60 hover:text-gold-foil transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gold-foil/40 rounded">

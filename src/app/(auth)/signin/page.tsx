@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,8 +29,10 @@ type SignInFormValues = z.infer<typeof signInSchema>;
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
+  const verified = searchParams.get('verified');
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const {
@@ -64,8 +66,8 @@ export default function SignInPage() {
         <CardHeader className="text-center">
           <Link href="/" className="flex justify-center mb-4">
             <Image
-              src="/images/wedvite-logo.png"
-              alt="WedVite Logo"
+              src="/Elivra-logo.png"
+              alt="Elivra Logo"
               width={60}
               height={60}
               className="hover:opacity-80 transition-opacity duration-200"
@@ -74,7 +76,7 @@ export default function SignInPage() {
           </Link>
           <CardTitle className="text-3xl font-bold text-[#1D3557] font-playfair-display">Sign In</CardTitle>
           <CardDescription className="text-slate-gray font-inter">
-            Enter your credentials to access your WedVite dashboard.
+            Enter your credentials to access your Elivra dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,6 +112,13 @@ export default function SignInPage() {
               </button>
               {errors.password && <p className="text-sm text-blush font-inter">{errors.password.message}</p>}
             </div>
+            {verified === '1' && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                <p className="text-sm text-green-600 font-inter text-center">
+                  Email verified successfully! Please sign in to continue.
+                </p>
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
                 <p className="text-sm text-red-600 font-inter text-center">{error}</p>

@@ -9,8 +9,8 @@ const playfairDisplay = Playfair_Display({ subsets: ["latin"], variable: "--font
 const greatVibes = Great_Vibes({ subsets: ["latin"], weight: "400", variable: "--font-great-vibes" });
 
 export const metadata: Metadata = {
-  title: "WEDVITE",
-  description: "Your one-stop solution for wedding invitations",
+  title: "Elivra | Elegant Event Invites",
+  description: "Elivra lets you design and share premium digital invitations with QR codes — perfect for weddings, galas, and exclusive events.",
 };
 
 export default function RootLayout({

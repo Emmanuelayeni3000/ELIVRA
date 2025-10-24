@@ -20,6 +20,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 
+type InviteStatusApi = 'pending' | 'accepted' | 'declined' | 'attending' | 'not-attending' | null;
+
+const normalizeRsvpStatus = (status: InviteStatusApi): 'pending' | 'accepted' | 'declined' => {
+  if (status === 'attending' || status === 'accepted') {
+    return 'accepted';
+  }
+
+  if (status === 'not-attending' || status === 'declined') {
+    return 'declined';
+  }
+
+  return 'pending';
+};
+
+const formatStatusLabel = (status: 'pending' | 'accepted' | 'declined'): string => {
+  switch (status) {
+    case 'accepted':
+      return 'Attending';
+    case 'declined':
+      return 'Not Attending';
+    default:
+      return 'Pending';
+  }
+};
+
 interface Event {
   id: string;
   title: string;
@@ -32,8 +57,9 @@ interface Invite {
   id: string;
   guestName: string;
   email: string;
-  rsvpStatus: 'pending' | 'accepted' | 'declined' | null;
-  guestCount?: number;
+  rsvpStatus: 'pending' | 'accepted' | 'declined';
+  rawStatus?: InviteStatusApi;
+  guestCount?: number | null;
   sentAt?: string;
   viewedAt?: string;
   rsvpAt?: string;
@@ -81,10 +107,11 @@ export default function RSVPManagePage() {
 
     // Status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(invite => {
+      filtered = filtered.filter((invite) => {
         if (statusFilter === 'pending') {
-          return !invite.rsvpStatus || invite.rsvpStatus === 'pending';
+          return invite.rsvpStatus === 'pending';
         }
+
         return invite.rsvpStatus === statusFilter;
       });
     }
@@ -124,17 +151,43 @@ export default function RSVPManagePage() {
       if (!response.ok) throw new Error('Failed to fetch invites');
       
       const data = await response.json();
-      const invitesData = data.invites || [];
-      setInvites(invitesData);
-      
+      const invitesData = Array.isArray(data.invites) ? data.invites : [];
+
+      const normalizedInvites: Invite[] = invitesData.map((invite: any) => {
+        const normalizedStatus = normalizeRsvpStatus((invite?.rsvpStatus ?? null) as InviteStatusApi);
+        let additionalGuests = 0;
+
+        if (typeof invite?.guestCount === 'number') {
+          additionalGuests = invite.guestCount;
+        } else if (typeof invite?.guestCount === 'string') {
+          const parsed = Number(invite.guestCount);
+          additionalGuests = Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        additionalGuests = Math.max(0, Number.isNaN(additionalGuests) ? 0 : additionalGuests);
+
+        return {
+          ...invite,
+          rawStatus: (invite?.rsvpStatus ?? null) as InviteStatusApi,
+          rsvpStatus: normalizedStatus,
+          guestCount: additionalGuests,
+        } as Invite;
+      });
+
+      setInvites(normalizedInvites);
+
       // Calculate stats
-      const total = invitesData.length;
-      const pending = invitesData.filter((i: Invite) => !i.rsvpStatus || i.rsvpStatus === 'pending').length;
-      const accepted = invitesData.filter((i: Invite) => i.rsvpStatus === 'accepted').length;
-      const declined = invitesData.filter((i: Invite) => i.rsvpStatus === 'declined').length;
+      const total = normalizedInvites.length;
+      const pending = normalizedInvites.filter((invite) => invite.rsvpStatus === 'pending').length;
+      const accepted = normalizedInvites.filter((invite) => invite.rsvpStatus === 'accepted').length;
+      const declined = normalizedInvites.filter((invite) => invite.rsvpStatus === 'declined').length;
       const responseRate = total > 0 ? Math.round(((accepted + declined) / total) * 100) : 0;
-      const totalGuests = invitesData.reduce((sum: number, invite: Invite) => {
-        return sum + (invite.rsvpStatus === 'accepted' ? (invite.guestCount || 1) : 0);
+      const totalGuests = normalizedInvites.reduce((sum, invite) => {
+        if (invite.rsvpStatus !== 'accepted') {
+          return sum;
+        }
+
+        return sum + 1 + (invite.guestCount ?? 0);
       }, 0);
 
       setStats({
@@ -143,7 +196,7 @@ export default function RSVPManagePage() {
         accepted,
         declined,
         responseRate,
-        totalGuests
+        totalGuests,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch RSVPs');
@@ -171,16 +224,22 @@ export default function RSVPManagePage() {
   const exportGuestList = () => {
     const csvContent = [
       ['Name', 'Email', 'Status', 'Guest Count', 'RSVP Date', 'Event', 'Message'],
-      ...filteredInvites.map(invite => [
-        invite.guestName,
-        invite.email,
-        invite.rsvpStatus || 'pending',
-        invite.guestCount || 1,
-        invite.rsvpAt ? format(new Date(invite.rsvpAt), 'MMM dd, yyyy') : '',
-        invite.event.title,
-        invite.message || ''
-      ])
-    ].map(row => row.join(',')).join('\n');
+      ...filteredInvites.map((invite) => {
+        const partySize = invite.rsvpStatus === 'accepted' ? 1 + (invite.guestCount ?? 0) : 0;
+
+        return [
+          invite.guestName,
+          invite.email,
+          formatStatusLabel(invite.rsvpStatus),
+          partySize.toString(),
+          invite.rsvpAt ? format(new Date(invite.rsvpAt), 'MMM dd, yyyy') : '',
+          invite.event.title,
+          invite.message || '',
+        ];
+      }),
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -191,7 +250,7 @@ export default function RSVPManagePage() {
     window.URL.revokeObjectURL(url);
   };
 
-  const getStatusBadge = (status: string | null) => {
+  const getStatusBadge = (status: 'pending' | 'accepted' | 'declined') => {
     switch (status) {
       case 'accepted':
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Attending</Badge>;
@@ -412,12 +471,12 @@ export default function RSVPManagePage() {
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        {invite.rsvpStatus === 'accepted' && invite.guestCount && (
+                        {invite.rsvpStatus === 'accepted' && (invite.guestCount ?? 0) > 0 && (
                           <Badge variant="outline" className="text-royal-navy border-royal-navy">
-                            {invite.guestCount} guest{invite.guestCount > 1 ? 's' : ''}
+                            Bringing {invite.guestCount} guest{(invite.guestCount ?? 0) > 1 ? 's' : ''}
                           </Badge>
                         )}
-                        {(!invite.rsvpStatus || invite.rsvpStatus === 'pending') && (
+                        {invite.rsvpStatus === 'pending' && (
                           <Button
                             size="sm"
                             onClick={() => sendReminder(invite.id)}

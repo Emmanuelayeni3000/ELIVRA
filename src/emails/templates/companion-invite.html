@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>You&#39;re Joining the Celebration!</title>
+    <title>Elivra - You&#39;re Joining the Celebration!</title>
     <style>
       body {
         margin: 0;
@@ -117,6 +117,29 @@
         display: none;
       }
 
+      .cta-button-wrapper {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #1d3557, #2a4a6b);
+        color: #ffffff !important;
+        padding: 14px 32px;
+        border-radius: 999px;
+        font-weight: 600;
+        text-decoration: none;
+        letter-spacing: 0.4px;
+        box-shadow: 0 10px 20px rgba(29, 53, 87, 0.18);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 24px rgba(29, 53, 87, 0.22);
+      }
+
       .footer {
         text-align: center;
         font-size: 13px;
@@ -184,6 +207,10 @@
 
         <div class="personal-message">[Personal Message]</div>
 
+        <div class="cta-button-wrapper">
+          <a href="[Companion Invite Link]" class="cta-button">View Your Invitation</a>
+        </div>
+
         <div class="cta">
           <p>
             Please coordinate with [Primary Guest Name] if you have any questions or special requests.
@@ -195,7 +222,7 @@
         </div>
 
         <div class="footer">
-          Sent with love via WedVite — making every celebration unforgettable.
+          Sent with love via Elivra — making every celebration unforgettable.
         </div>
       </div>
     </div>

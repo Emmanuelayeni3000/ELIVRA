@@ -39,16 +39,32 @@ export async function GET() {
     });
 
     const totalInvites = invites.length;
-    const totalGuests = invites.reduce((acc, invite) => acc + (invite.guestCount || 1), 0);
+    const totalGuests = invites.reduce((acc, invite) => acc + (1 + (invite.guestCount ?? 0)), 0);
     
     const rsvpStats = invites.reduce(
       (acc, invite) => {
-        if (!invite.rsvpStatus || invite.rsvpStatus === 'pending') {
-          acc.pending += invite.guestCount || 1;
-        } else if (invite.rsvpStatus === 'accepted') {
-          acc.accepted += invite.guestCount || 1;
-        } else if (invite.rsvpStatus === 'declined') {
-          acc.declined += invite.guestCount || 1;
+        const normalizedStatus = (() => {
+          if (!invite.rsvpStatus || invite.rsvpStatus === 'pending') {
+            return 'pending';
+          }
+
+          if (invite.rsvpStatus === 'attending' || invite.rsvpStatus === 'accepted') {
+            return 'accepted';
+          }
+
+          if (invite.rsvpStatus === 'not-attending' || invite.rsvpStatus === 'declined') {
+            return 'declined';
+          }
+
+          return 'pending';
+        })();
+
+        if (normalizedStatus === 'pending') {
+          acc.pending += 1 + (invite.guestCount ?? 0);
+        } else if (normalizedStatus === 'accepted') {
+          acc.accepted += 1 + (invite.guestCount ?? 0);
+        } else if (normalizedStatus === 'declined') {
+          acc.declined += 1 + (invite.guestCount ?? 0);
         }
         return acc;
       },
@@ -126,8 +142,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Dashboard stats error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to fetch dashboard statistics';
     return NextResponse.json(
-      { error: 'Failed to fetch dashboard statistics' },
+      { error: 'Failed to fetch dashboard statistics', details: message },
       { status: 500 }
     );
   }

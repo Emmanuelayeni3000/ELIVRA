@@ -16,7 +16,7 @@ export const sendEmail = async ({ to, subject, html, from = process.env.RESEND_F
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `WedVite <${from}>`,
+      from: `Elivra <${from}>`,
       to: Array.isArray(to) ? to : [to],
       subject,
       html,

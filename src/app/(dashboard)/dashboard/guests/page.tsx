@@ -226,7 +226,7 @@ export default function GuestsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleResendInvite(guest.id)}
-                            title="Resend Invitation"
+                            title="Send Email"
                             className="hover:text-gold-foil"
                           >
                             <Mail className="w-4 h-4" />

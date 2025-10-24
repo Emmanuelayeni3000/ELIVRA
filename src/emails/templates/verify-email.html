@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Your Email</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f5f0e6;
+        font-family: 'Inter', Arial, sans-serif;
+        color: #1d3557;
+      }
+      .wrapper {
+        width: 100%;
+        padding: 40px 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(29, 53, 87, 0.08);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #1d3557, #2a4a6b);
+        padding: 40px 30px;
+        text-align: center;
+        color: #ffffff;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-family: 'Playfair Display', Georgia, serif;
+      }
+      .content {
+        padding: 40px 30px;
+      }
+      .content p {
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .button {
+        display: inline-block;
+        padding: 16px 32px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #c9a368, #d4b377);
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 15px 30px rgba(201, 163, 104, 0.35);
+      }
+      .footer {
+        padding: 30px;
+        background: #faf5f0;
+        text-align: center;
+        font-size: 12px;
+        color: #65748b;
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          margin: 0 16px;
+        }
+        .content {
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="container">
+        <div class="header">
+          <h1>Confirm Your Email</h1>
+        </div>
+        <div class="content">
+          <p>Hello [User Name],</p>
+          <p>
+            Thanks for creating an Elivra account! Please confirm your email address so we can unlock your personalised
+            planning dashboard.
+          </p>
+          <p style="text-align: center; margin: 40px 0;">
+            <a class="button" href="[Verification Link]">Verify Email</a>
+          </p>
+          <p>
+            For your security, this link will expire in 24 hours. If you didn&apos;t create this account, you can safely
+            ignore this message.
+          </p>
+          <p>With appreciation,<br />The Elivra Team</p>
+        </div>
+        <div class="footer">
+          <p>
+            Need help? Reply to this email or visit <a href="[BASE_URL]" style="color: #c9a368; text-decoration: none;">Elivra</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

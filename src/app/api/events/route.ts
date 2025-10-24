@@ -14,7 +14,7 @@ const createEventSchema = z.object({
   location: z.string().min(1, 'Event location is required'),
   description: z.string().optional(),
   hashtag: z.string().optional(),
-  guestLimit: z.number().optional(),
+  capacity: z.number().optional(),
   dressCode: z.string().optional(),
 }).refine((data) => {
   if (data.type === 'other' && (!data.customType || data.customType.trim() === '')) {
@@ -26,12 +26,22 @@ const createEventSchema = z.object({
   path: ['customType'],
 });
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-  const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user) {
+      return NextResponse.json({ error: 'Account not found. Please sign in again.' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    const take = Number.isFinite(limit) && limit && limit > 0 ? limit : undefined;
 
     const events = await prisma.event.findMany({
       where: {
@@ -40,32 +50,59 @@ export async function GET() {
       orderBy: {
         date: 'desc',
       },
+      ...(take && { take }),
     });
 
     return NextResponse.json({ events }, { status: 200 });
   } catch (error: unknown) {
     console.error('Fetch events error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: 'Internal server error', details: message }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-  const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user) {
+      return NextResponse.json({ error: 'Account not found. Please sign in again.' }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { title, type, customType, date, time, location, description, hashtag, guestLimit, dressCode } = createEventSchema.parse(body);
+    const { title, type, customType, date, time, location, description, hashtag, capacity, dressCode } = createEventSchema.parse(body);
 
     // Get the first available template
-    const defaultTemplate = await prisma.template.findFirst({
+    let defaultTemplate = await prisma.template.findFirst({
       where: { slug: 'classic' }
     });
 
     if (!defaultTemplate) {
-      return NextResponse.json({ error: 'No template available' }, { status: 500 });
+      defaultTemplate = await prisma.template.create({
+        data: {
+          name: 'Classic Elegance',
+          slug: 'classic',
+          description: 'Timeless design with serif fonts and traditional layout',
+          isPremium: false,
+          styleConfig: {
+            colors: {
+              primary: '#1D3557',
+              secondary: '#C9A368',
+              background: '#FFFFFF',
+              text: '#444444',
+            },
+            fonts: {
+              heading: 'Playfair Display',
+              body: 'Inter',
+            },
+            layout: 'centered',
+          },
+        },
+      });
     }
 
     // Use customType if type is 'other', otherwise use the selected type
@@ -80,7 +117,7 @@ export async function POST(request: Request) {
         location,
         description: description || null,
         hashtag: hashtag || null,
-        guestLimit: guestLimit || null,
+        guestLimit: capacity || null,
         dressCode: dressCode || null,
         userId: session.user.id,
         templateId: defaultTemplate.id,
@@ -93,6 +130,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
     console.error('Create event error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: 'Internal server error', details: message }, { status: 500 });
   }
 }

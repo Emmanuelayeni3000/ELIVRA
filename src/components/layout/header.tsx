@@ -35,8 +35,8 @@ export default function Header() {
   <nav className="flex items-center justify-between max-w-7xl p-2 mx-auto">
         <Link href="/" className="flex items-center">
           <Image
-            src="/images/wedvite-logo.png"
-            alt="WedVite Logo"
+            src="/Elivra-logo.png"
+            alt="Elivra Logo"
             width={50}
             height={50}
             className="h-19 w-19"
@@ -74,8 +74,8 @@ export default function Header() {
           <div className="p-4 border-b border-gray-100">
             <Link href="/" className="flex items-center" onClick={() => setIsOffcanvasOpen(false)}>
               <Image
-                src="/images/wedvite-logo.png"
-                alt="WedVite Logo"
+                src="/Elivra-logo.png"
+                alt="Elivra Logo"
                 width={50}
                 height={50}
                 className="h-12 w-12"
