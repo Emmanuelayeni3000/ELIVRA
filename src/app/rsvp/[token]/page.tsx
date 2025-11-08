@@ -280,7 +280,7 @@ export default function RSVPPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-pearl-beige/50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl animate-pulse">
+        <Card className="w-full max-w-2xl animate-pulse bg-white">
           <CardHeader className="space-y-2">
             <div className="h-8 bg-slate-200 rounded w-3/4" />
             <div className="h-4 bg-slate-200 rounded w-1/2" />
@@ -298,7 +298,7 @@ export default function RSVPPage() {
   if (loadError || !event || !guest) {
     return (
       <div className="min-h-screen bg-pearl-beige/50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
+        <Card className="w-full max-w-2xl bg-white">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-destructive">
               {loadError || 'Invalid Invitation'}
@@ -317,7 +317,7 @@ export default function RSVPPage() {
 
   return (
     <div className="min-h-screen bg-pearl-beige/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-stats-card">
+      <Card className="w-full max-w-2xl shadow-stats-card bg-white">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-royal-navy font-playfair-display">
             {event.title}

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
-  const { token } = params;
+export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
   const baseUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || request.nextUrl.origin;
 
   const buildRedirect = (path: string) => NextResponse.redirect(new URL(path, baseUrl));

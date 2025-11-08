@@ -22,6 +22,19 @@ import { toast } from 'sonner';
 
 type InviteStatusApi = 'pending' | 'accepted' | 'declined' | 'attending' | 'not-attending' | null;
 
+interface InviteApiResponse {
+  id: string;
+  guestName: string;
+  email: string;
+  rsvpStatus: InviteStatusApi;
+  guestCount?: number | string | null;
+  sentAt?: string;
+  viewedAt?: string;
+  rsvpAt?: string;
+  message?: string;
+  event: Event;
+}
+
 const normalizeRsvpStatus = (status: InviteStatusApi): 'pending' | 'accepted' | 'declined' => {
   if (status === 'attending' || status === 'accepted') {
     return 'accepted';
@@ -153,7 +166,7 @@ export default function RSVPManagePage() {
       const data = await response.json();
       const invitesData = Array.isArray(data.invites) ? data.invites : [];
 
-      const normalizedInvites: Invite[] = invitesData.map((invite: any) => {
+      const normalizedInvites: Invite[] = invitesData.map((invite: InviteApiResponse) => {
         const normalizedStatus = normalizeRsvpStatus((invite?.rsvpStatus ?? null) as InviteStatusApi);
         let additionalGuests = 0;
 

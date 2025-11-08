@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+// Use a placeholder API key during build time if not provided
+const apiKey = process.env.RESEND_API_KEY || 're_placeholder_key_for_build';
+export const resend = new Resend(apiKey);
 
 interface SendEmailOptions {
   to: string | string[];
@@ -10,6 +12,10 @@ interface SendEmailOptions {
 }
 
 export const sendEmail = async ({ to, subject, html, from = process.env.RESEND_FROM_EMAIL }: SendEmailOptions) => {
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_placeholder_key_for_build') {
+    throw new Error('RESEND_API_KEY is not defined in environment variables.');
+  }
+
   if (!from) {
     throw new Error('RESEND_FROM_EMAIL is not defined in environment variables.');
   }

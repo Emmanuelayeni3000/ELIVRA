@@ -1,11 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const status = searchParams.get('status');
@@ -65,5 +66,33 @@ export default function VerifyEmailPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-pearl-beige p-4">
+        <Card className="w-full max-w-md shadow-stats-card bg-white">
+          <CardHeader className="text-center space-y-4">
+            <Link href="/" className="flex justify-center">
+              <Image
+                src="/Elivra-logo.png"
+                alt="Elivra Logo"
+                width={60}
+                height={60}
+                className="hover:opacity-80 transition-opacity duration-200"
+                priority
+              />
+            </Link>
+            <CardTitle className="text-3xl font-bold text-royal-navy font-playfair-display">
+              Loading...
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

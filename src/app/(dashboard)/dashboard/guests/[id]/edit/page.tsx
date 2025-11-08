@@ -22,6 +22,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
+import { generateQRCodeDataURL } from '@/lib/qr-code';
+import DownloadQRButton from '@/components/download-qr-button';
 
 
 const updateGuestSchema = z.object({
@@ -35,6 +38,7 @@ type UpdateGuestFormValues = z.infer<typeof updateGuestSchema>;
 
 export default function EditGuestPage({ params }: { params: Promise<{ id: string }> }) {
 	const [id, setId] = useState<string>('');
+	const [qrCodeDataURL, setQrCodeDataURL] = useState<string | null>(null);
 	const router = useRouter();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -67,6 +71,16 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
       
 			const data = await response.json();
 			form.reset(data.guest);
+			// Generate QR code data URL for this guest so host can show/download it
+			try {
+				// QR should point to the guest's invite card page (/invite/{guestId})
+				const inviteCardLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${data.guest.id}`;
+				const qr = await generateQRCodeDataURL(inviteCardLink, 256);
+				setQrCodeDataURL(qr);
+			} catch (err) {
+				// Non-fatal: QR generation failed, log and continue without breaking the page
+				console.error('QR generation failed for guest edit page', err);
+			}
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Failed to fetch guest';
 			setError(errorMessage);
@@ -190,6 +204,22 @@ export default function EditGuestPage({ params }: { params: Promise<{ id: string
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
+					{qrCodeDataURL && (
+						<div className="flex flex-col items-center space-y-3 mb-4">
+							<div className="relative">
+								<Image
+									src={qrCodeDataURL}
+									alt="Guest Invitation QR"
+									width={160}
+									height={160}
+									className="border border-royal-navy/30 rounded-md bg-white/80"
+								/>
+							</div>
+							<div className="flex gap-3">
+								<DownloadQRButton qrCodeDataURL={qrCodeDataURL} inviteId={id} />
+							</div>
+						</div>
+					)}
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 							<FormField
